@@ -25,7 +25,7 @@ XM430-W350 and XM540-W270 actuator models from
 | --- | --- | --- |
 | **`martinorrje/swenoid`** (this repository) | MuJoCo model, MjLab tasks, BONES-SEED retargeting, training, visualization, and ONNX export | Available |
 | [`martinorrje/bam`](https://github.com/martinorrje/bam) | Swenoid BAM fork, raw-data processing, XM430/XM540 fitting, parameters, and fit plots | Fork publication pending |
-| Swenoid CAD | Editable CAD, print exports, assembly information, and bill of materials | Repository publication pending |
+| [`martinorrje/swenoid_cad`](https://github.com/martinorrje/swenoid_cad) | Editable CAD, print exports, assembly information, and bill of materials | Repository publication pending |
 
 The MuJoCo meshes needed to run this repository are included, so the unpublished
 editable CAD sources do not block simulation or training.
