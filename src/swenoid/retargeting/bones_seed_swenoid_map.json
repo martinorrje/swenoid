@@ -1,0 +1,30 @@
+{
+  "target_xml": "../assets/swenoid/xmls/swenoid.xml",
+  "source_angle_unit": "degree",
+  "source_root_translation_unit": "centimeter",
+  "source_root_euler_order": "xyz",
+  "root_scale": "auto",
+  "joint_map": {
+    "left_hip_pitch_joint": "left_hip_pitch_joint",
+    "left_hip_roll_joint": "left_hip_roll_joint",
+    "left_hip_yaw_joint": "left_hip_yaw_joint",
+    "left_knee_joint": "left_knee_joint",
+    "left_ankle_joint": "left_ankle_pitch_joint",
+    "right_hip_pitch_joint": "right_hip_pitch_joint",
+    "right_hip_roll_joint": "right_hip_roll_joint",
+    "right_hip_yaw_joint": "right_hip_yaw_joint",
+    "right_knee_joint": "right_knee_joint",
+    "right_ankle_joint": "right_ankle_pitch_joint",
+    "torso_yaw_joint": "waist_yaw_joint",
+    "torso_roll_joint": "waist_roll_joint",
+    "torso_pitch_joint": "waist_pitch_joint",
+    "left_shoulder_pitch_joint": "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint": "left_shoulder_roll_joint",
+    "left_shoulder_yaw_joint": "left_shoulder_yaw_joint",
+    "left_elbow_joint": "left_elbow_joint",
+    "right_shoulder_pitch_joint": "right_shoulder_pitch_joint",
+    "right_shoulder_roll_joint": "right_shoulder_roll_joint",
+    "right_shoulder_yaw_joint": "right_shoulder_yaw_joint",
+    "right_elbow_joint": "right_elbow_joint"
+  }
+}

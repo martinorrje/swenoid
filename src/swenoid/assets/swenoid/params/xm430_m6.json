@@ -1,0 +1,19 @@
+{
+  "kt": 2.5782903085206867,
+  "R": 4.775253445005857,
+  "armature": 0.009371464903323632,
+  "q_offset": 0.014923155541114091,
+  "friction_base": 4.9355957666610385e-05,
+  "friction_stribeck": 5.1230743347301365e-05,
+  "load_friction_motor": 0.07120455638732046,
+  "load_friction_external": 3.0415286314002237e-05,
+  "load_friction_motor_stribeck": 9.107024615237575e-06,
+  "load_friction_external_stribeck": 0.5414043891455004,
+  "load_friction_motor_quad": 0.003949223687611607,
+  "load_friction_external_quad": 0.0020968640418588115,
+  "dtheta_stribeck": 0.4537175697040154,
+  "alpha": 0.934434736276242,
+  "friction_viscous": 0.018008424226806232,
+  "model": "m6",
+  "actuator": "xm430_w350"
+}

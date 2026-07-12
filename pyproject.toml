@@ -1,0 +1,153 @@
+[build-system]
+requires = ["uv_build>=0.8.19,<0.9.0"]
+build-backend = "uv_build"
+
+[project]
+name = "swenoid"
+version = "0.1.0"
+description = "Open-source simulation, retargeting, and policy training for Swenoid."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+  {name = "Martin Orrje", email = "morrje@kth.se"},
+  {name = "Arvid Eriksson", email = "arveri@kth.se"},
+  {name = "David Broman", email = "dbro@kth.se"},
+]
+keywords = [
+  "humanoid-robotics",
+  "mujoco",
+  "reinforcement-learning",
+  "motion-tracking",
+  "sim-to-real",
+]
+dependencies = []
+
+[project.optional-dependencies]
+training = [
+  "mjlab[cu128]==1.4.0",
+  "better-actuator-models>=1.0.1",
+]
+retargeting = [
+  "numpy>=2.0",
+  "scipy>=1.13",
+  "mujoco>=3.3",
+  "mediapy>=1.2.4",
+  "imageio-ffmpeg>=0.6",
+  "wandb>=0.20",
+]
+sim2sim = [
+  "numpy>=2.0",
+  "scipy>=1.13",
+  "mujoco>=3.3",
+  "better-actuator-models>=1.0.1",
+  "onnx>=1.16",
+  "onnxruntime>=1.19",
+  "wandb>=0.20",
+]
+deployment = [
+  "numpy>=2.0",
+  "scipy>=1.13",
+  "onnx>=1.16",
+  "onnxruntime>=1.19",
+  "wandb>=0.20",
+  "dynamixel-sdk>=3.8.4,<5",
+  "adafruit-circuitpython-bno08x>=1.3.3,<2",
+  "Adafruit-Blinka>=9.1,<10",
+]
+
+[project.urls]
+Homepage = "https://github.com/martinorrje/swenoid"
+Repository = "https://github.com/martinorrje/swenoid"
+Issues = "https://github.com/martinorrje/swenoid/issues"
+"MjLab upstream" = "https://github.com/mujocolab/mjlab"
+"BAM upstream" = "https://github.com/Rhoban/bam"
+
+[project.scripts]
+swenoid-train = "swenoid.scripts.train:main"
+swenoid-play = "swenoid.scripts.play:main"
+swenoid-list-envs = "swenoid.scripts.list_envs:main"
+swenoid-retarget = "swenoid.retargeting.bones_seed:main"
+swenoid-filter-motions = "swenoid.retargeting.filter_sequences:main"
+swenoid-convert-motion = "swenoid.retargeting.convert_motion:main"
+swenoid-render-motion = "swenoid.retargeting.render_qpos:main"
+swenoid-upload-motion = "swenoid.retargeting.upload_wandb:main"
+swenoid-sim2sim = "swenoid.deployment.sim2sim:main"
+swenoid-deploy = "swenoid.deployment.real:main"
+swenoid-bno085 = "swenoid.deployment.bno085:main"
+
+[dependency-groups]
+dev = [
+  "mjlab[cu128]==1.4.0",
+  "better-actuator-models>=1.0.1",
+  "numpy>=2.0",
+  "scipy>=1.13",
+  "mujoco>=3.3",
+  "torch>=2.7",
+  "mediapy>=1.2.4",
+  "imageio-ffmpeg>=0.6",
+  "wandb>=0.20",
+  "onnx>=1.16",
+  "onnxruntime>=1.19",
+  "pyright>=1.1.408",
+  "pytest>=9.0.3",
+  "ruff>=0.14.14",
+]
+
+[tool.uv]
+override-dependencies = ["mujoco>=3.8.0.dev0"]
+constraint-dependencies = [
+  "GitPython>=3.1.49",
+  "lxml>=6.1.0",
+]
+required-environments = [
+  "sys_platform == 'darwin' and platform_machine == 'arm64'",
+  "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com/"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "mujoco"
+url = "https://py.mujoco.org"
+explicit = true
+
+[tool.uv.sources]
+warp-lang = {index = "nvidia", marker = "sys_platform != 'darwin'"}
+torch = [
+  {index = "pytorch-cu128", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'"},
+]
+mujoco = {index = "mujoco"}
+mujoco-warp = {index = "mujoco"}
+
+[tool.ruff]
+line-length = 88
+exclude = ["typings"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+indent-style = "space"
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+stubPath = "typings"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

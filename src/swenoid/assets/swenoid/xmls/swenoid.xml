@@ -1,0 +1,327 @@
+<?xml version="1.0" ?>
+<mujoco model="ImportedModel">
+<compiler angle="radian" meshdir="assets" autolimits="true"/>
+  <asset>
+    <mesh name="head_platform" file="head_platform.stl"/>
+    <mesh name="head_platform_collision" file="head_platform_collision.stl"/>
+    <mesh name="hip_mid_section" file="hip_mid_section.stl"/>
+    <mesh name="hip_mid_section_collision" file="hip_mid_section_collision.stl"/>
+    <mesh name="torso" file="torso.stl"/>
+    <mesh name="torso_collision" file="torso_collision.stl"/>
+    <mesh name="torso_upper_handle" file="torso_upper_handle.stl"/>
+    <mesh name="torso_upper_handle_collision" file="torso_upper_handle_collision.stl"/>
+    <mesh name="r_upper_handle" file="r_upper_handle.stl"/>
+    <mesh name="r_upper_handle_collision" file="r_upper_handle_collision.stl"/>
+    <mesh name="r_shoulder_x" file="r_shoulder_x.stl"/>
+    <mesh name="r_shoulder_x_collision" file="r_shoulder_x_collision.stl"/>
+    <mesh name="r_arm_mid_part" file="r_arm_mid_part.stl"/>
+    <mesh name="r_arm_mid_part_collision" file="r_arm_mid_part_collision.stl"/>
+    <mesh name="r_elbow_part" file="r_elbow_part.stl"/>
+    <mesh name="r_elbow_part_collision" file="r_elbow_part_collision.stl"/>
+    <mesh name="l_upper_handle" file="l_upper_handle.stl"/>
+    <mesh name="l_upper_handle_collision" file="l_upper_handle_collision.stl"/>
+    <mesh name="l_shoulder_x" file="l_shoulder_x.stl"/>
+    <mesh name="l_shoulder_x_collision" file="l_shoulder_x_collision.stl"/>
+    <mesh name="l_arm_mid_part" file="l_arm_mid_part.stl"/>
+    <mesh name="l_arm_mid_part_collision" file="l_arm_mid_part_collision.stl"/>
+    <mesh name="l_elbow_part" file="l_elbow_part.stl"/>
+    <mesh name="l_elbow_part_collision" file="l_elbow_part_collision.stl"/>
+    <mesh name="l_hip_z" file="l_hip_z.stl"/>
+    <mesh name="l_hip_z_collision" file="l_hip_z_collision.stl"/>
+    <mesh name="r_hip_z" file="r_hip_z.stl"/>
+    <mesh name="r_hip_z_collision" file="r_hip_z_collision.stl"/>
+    <mesh name="l_hip_y" file="l_hip_y.stl"/>
+    <mesh name="l_hip_y_collision" file="l_hip_y_collision.stl"/>
+    <mesh name="l_thigh" file="l_thigh.stl"/>
+    <mesh name="l_thigh_collision" file="l_thigh_collision.stl"/>
+    <mesh name="left_shin_part" file="left_shin_part.stl"/>
+    <mesh name="left_shin_part_collision" file="left_shin_part_collision.stl"/>
+    <mesh name="left_foot" file="left_foot.stl"/>
+    <mesh name="left_foot_collision" file="left_foot_collision.stl"/>
+    <mesh name="r_hip_y" file="r_hip_y.stl"/>
+    <mesh name="r_hip_y_collision" file="r_hip_y_collision.stl"/>
+    <mesh name="r_thigh" file="r_thigh.stl"/>
+    <mesh name="r_thigh_collision" file="r_thigh_collision.stl"/>
+    <mesh name="right_shin_part" file="right_shin_part.stl"/>
+    <mesh name="right_shin_part_collision" file="right_shin_part_collision.stl"/>
+    <mesh name="right_foot" file="right_foot.stl"/>
+    <mesh name="right_foot_collision" file="right_foot_collision.stl"/>
+    <mesh name="chin" file="chin.stl"/>
+    <mesh name="chin_collision" file="chin_collision.stl"/>
+    <mesh name="neck" file="neck.stl"/>
+    <mesh name="neck_collision" file="neck_collision.stl"/>
+    <mesh name="chest" file="chest.stl"/>
+    <mesh name="chest_collision" file="chest_collision.stl"/>
+  </asset>
+  <default>
+    <site group="4" type="sphere"/>
+    <default class="servo_xm540">
+      <position forcerange="-10 10" ctrlrange="-10 10" ctrllimited="true" kp="20.0"/>
+      <joint damping="1.0" armature="0.01"/>
+    </default>
+    <default class="servo_xm430">
+      <position forcerange="-5 5" ctrlrange="-5 5" ctrllimited="true" kp="20.0"/>
+      <joint damping="1.0" armature="0.01"/>
+    </default>
+    <geom type="mesh" contype="0" conaffinity="0" friction="0.6"/>
+    <default class="visual">
+      <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="collision">
+      <geom group="3" contype="1" conaffinity="1" condim="1"/>
+      <default class="foot">
+        <geom type="box" friction="0.6 0.02 0.01"/>
+      </default>
+    </default>
+  </default>
+  <worldbody>
+    <body name="hip_mid_section" pos="0 0 0.301207" quat="1 0 0 0">
+      <joint name="root_free_joint" type="free"/>
+      <camera name="tracking" pos="1.2 -0.8 0.4" mode="targetbody" target="hip_mid_section"/>
+      <inertial mass="0.5938" pos="0.00444971 0.000527454 0" fullinertia="0.00125364 0.000383839 0.00115789 1.05143e-06 2.59967e-05 -1.27551e-05"/>
+      <geom name="hip_mid_section_visual" mesh="hip_mid_section" class="visual"/>
+      <geom name="hip_mid_section_collision" mesh="hip_mid_section_collision" class="collision"/>
+      <site type="sphere" size="0.02" rgba="1 0 0 1" name="left_hip_site" pos="-0.02429 -0.03 0.0"/>
+      <site type="sphere" size="0.02" rgba="1 0 0 1" name="right_hip_site" pos="-0.02429 0.03 0.0"/>
+      <site name="hip_imu"/>
+      <body name="l_hip_z" pos="0.038 0.0563 -0.00580234" quat="1 0 0 0">
+        <inertial mass="0.2642" pos="-0.0841984 0.00365625 -0.00073521" fullinertia="0.000111985 0.000278902 0.000282001 -4.9616e-05 1.13634e-06 -7.01029e-07"/>
+        <geom name="l_hip_z_visual" mesh="l_hip_z" class="visual"/>
+        <geom name="l_hip_z_collision" mesh="l_hip_z_collision" class="collision"/>
+        <body name="l_hip_y" pos="-0.08075 7.10543e-18 -0.0285" quat="1 0 0 0">
+          <inertial mass="0.2424" pos="0.0041117 0.000862977 -0.0222392" fullinertia="9.87699e-05 0.000109087 0.000145097 -1.1014e-05 5.5971e-07 1.17217e-07"/>
+          <geom name="l_hip_y_visual" mesh="l_hip_y" class="visual"/>
+          <geom name="l_hip_y_collision" mesh="l_hip_y_collision" class="collision"/>
+          <body name="l_thigh" pos="0.0185 0.03505 -0.0228" quat="1 0 0 0">
+            <inertial mass="0.2974" pos="3.062e-05 -0.0362906 -0.076016" fullinertia="0.000375581 0.000287283 0.000164701 -2.52533e-07 -7.28249e-08 3.2003e-05"/>
+            <geom name="l_thigh_visual" mesh="l_thigh" class="visual"/>
+            <geom name="l_thigh_collision" mesh="l_thigh_collision" class="collision"/>
+            <body name="left_shin_part" pos="-7.6294e-10 -0.001225 -0.10095" quat="1 0 0 0">
+              <inertial mass="0.2094" pos="-2.52093e-07 -0.0331842 -0.0715727" fullinertia="0.000410519 0.000323401 0.000157279 -1.01849e-09 -1.56438e-09 3.57645e-05"/>
+              <geom name="left_shin_part_visual" mesh="left_shin_part" class="visual"/>
+              <geom name="left_shin_part_collision" mesh="left_shin_part_collision" class="collision"/>
+              <site type="sphere" size="0.02" rgba="1 0 0 1" name="left_knee_site" pos="0.0 -0.034775 0.0"/>
+              <body name="left_foot" pos="-4.95955e-09 -0.004 -0.115905" quat="1 0 0 0">
+                <inertial mass="0.203" pos="0.0209862 -0.0337848 -0.00819084" fullinertia="6.28975e-05 0.000186749 0.000194238 3.8743e-07 2.20549e-05 6.43728e-08"/>
+                <geom name="left_foot_visual" mesh="left_foot" class="visual"/>
+                <geom name="left_foot_collision" class="foot" pos="0.0332694 -0.0319364 -0.003625" size="0.06175 0.0319451 0.0233713"/>
+                <site type="sphere" size="0.02" rgba="1 0 0 1" name="left_foot" pos="0.0 -0.031 0.0"/>
+                <!-- <body name="left_toe" pos="0.075 -0.031 -0.01725">
+                	 	<geom type="sphere" size="0.02" rgba="1 0 0 1"/>
+                </body>
+                <body name="left_heel_site" pos="-0.025 -0.031 -0.01725">
+                	 	<geom type="sphere" size="0.02" rgba="1 0 0 1"/>
+                </body> -->
+                <joint name="left_ankle_joint" axis="0 1 0" range="-0.5 1.5" class="servo_xm430"/>
+              </body>
+              <joint name="left_knee_joint" axis="0 1 0" range="-0.5 1.5" class="servo_xm540"/>
+            </body>
+            <joint name="left_hip_pitch_joint" axis="0 1 0" range="-1.6 1.6" class="servo_xm540"/>
+          </body>
+          <joint name="left_hip_yaw_joint" axis="0 0 1" range="-0.7 1.6" class="servo_xm540"/>
+        </body>
+        <joint name="left_hip_roll_joint" axis="1 0 0" range="-0.2 0.9" class="servo_xm540"/>
+      </body>
+      <body name="r_hip_z" pos="0.038 -0.0563 -0.00580234" quat="1 0 0 0">
+        <inertial mass="0.2642" pos="-0.0841994 -0.00365474 -0.000735174" fullinertia="0.000111986 0.000278905 0.000282006 4.96138e-05 1.12968e-06 7.11392e-07"/>
+        <geom name="r_hip_z_visual" mesh="r_hip_z" class="visual"/>
+        <geom name="r_hip_z_collision" mesh="r_hip_z_collision" class="collision"/>
+        <body name="r_hip_y" pos="-0.08075 -9.23706e-17 -0.0285" quat="1 0 0 0">
+          <inertial mass="0.2424" pos="0.00411158 -0.000848113 -0.0222393" fullinertia="9.89653e-05 0.000109087 0.000145293 1.0963e-05 5.59491e-07 -1.14639e-07"/>
+          <geom name="r_hip_y_visual" mesh="r_hip_y" class="visual"/>
+          <geom name="r_hip_y_collision" mesh="r_hip_y_collision" class="collision"/>
+          <body name="r_thigh" pos="0.0185 -0.03505 -0.0228" quat="1 0 0 0">
+            <inertial mass="0.2974" pos="2.34214e-05 0.036284 -0.0760047" fullinertia="0.00037532 0.000286845 0.000164601 1.59463e-07 -9.63979e-08 -3.20237e-05"/>
+            <geom name="r_thigh_visual" mesh="r_thigh" class="visual"/>
+            <geom name="r_thigh_collision" mesh="r_thigh_collision" class="collision"/>
+            <body name="right_shin_part" pos="-4.00008e-05 0.001185 -0.10095" quat="1 0 0 0">
+              <inertial mass="0.2094" pos="1.32723e-06 0.0331842 -0.0715842" fullinertia="0.00041072 0.000323618 0.000157297 -8.7962e-09 9.36249e-09 -3.56945e-05"/>
+              <geom name="right_shin_part_visual" mesh="right_shin_part" class="visual"/>
+              <geom name="right_shin_part_collision" mesh="right_shin_part_collision" class="collision"/>
+              <site type="sphere" size="0.02" rgba="1 0 0 1" name="right_knee_site" pos="0.0 0.034775 0.0"/>
+              <body name="right_foot" pos="4.95955e-09 0.004 -0.115905" quat="1 0 0 0">
+                <inertial mass="0.203" pos="0.0209862 0.0337848 -0.00819084" fullinertia="6.28975e-05 0.000186749 0.000194238 -3.8743e-07 2.20549e-05 -6.43728e-08"/>
+                <geom name="right_foot_visual" mesh="right_foot" class="visual"/>
+                <geom name="right_foot_collision" class="foot" pos="0.0332694 0.0319364 -0.003625" size="0.06175 0.0319451 0.0233713"/>
+                <site type="sphere" size="0.02" rgba="1 0 0 1" name="right_foot" pos="0.0 0.031 0.0"/>
+                <!-- <body name="right_toe_site" pos="0.075 0.031 -0.01725">
+                  <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
+                </body>
+                 <body name="right_heel_site" pos="-0.025 0.031 -0.01725">
+                  <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
+                </body> -->
+                <joint name="right_ankle_joint" axis="0 1 0" range="-0.5 1.5" class="servo_xm430"/>
+              </body>
+              <joint name="right_knee_joint" axis="0 1 0" range="-0.5 1.5" class="servo_xm540"/>
+            </body>
+            <joint name="right_hip_pitch_joint" axis="0 1 0" range="-1.6 1.6" class="servo_xm540"/>
+          </body>
+          <joint name="right_hip_yaw_joint" axis="0 0 1" range="-1.6 0.7" class="servo_xm540"/>
+        </body>
+        <joint name="right_hip_roll_joint" axis="1 0 0" range="-0.9 0.2" class="servo_xm540"/>
+      </body>
+      <body name="torso" pos="-0.003 -0.03505 0.0549477" quat="1 0 0 0">
+        <inertial mass="0.4594" pos="-0.0253705 0.0348555 0.019038" fullinertia="0.000229868 0.000627108 0.000551815 3.05422e-06 -5.38703e-07 2.42542e-06"/>
+        <geom name="torso_visual" mesh="torso" class="visual"/>
+        <geom name="torso_collision" mesh="torso_collision" class="collision"/>
+        <body name="torso_upper_handle" pos="0.0298 0.03505 0.03605" quat="1 0 0 0">
+          <inertial mass="0.0862" pos="-0.0639539 2.37147e-07 0.02734" fullinertia="3.4083e-05 0.000177213 0.000168265 -2.53181e-10 -1.91332e-05 -2.81839e-10"/>
+          <geom name="torso_upper_handle_visual" mesh="torso_upper_handle" class="visual"/>
+          <geom name="torso_upper_handle_collision" mesh="torso_upper_handle_collision" class="collision"/>
+          <body name="chest" pos="-0.0248 -1.10981e-16 0.0412" quat="1 0 0 0">
+            <site name="chest_imu"/>
+            <inertial mass="1.5536" pos="-0.023388 0.000523029 0.0479463" fullinertia="0.00326163 0.00332989 0.00358524 -1.84983e-06 -7.5718e-05 2.09468e-05"/>
+            <geom name="chest_visual" mesh="chest" class="visual"/>
+            <geom name="chest_collision" mesh="chest_collision" class="collision"/>
+            <body name="l_upper_handle" pos="-0.01555 0.05695 0.099" quat="1 0 0 0">
+              <inertial mass="0.0824" pos="0.00208293 0.0206581 5.3218e-06" fullinertia="3.45104e-05 7.32246e-05 8.59869e-05 -1.73035e-06 1.22635e-08 -4.98685e-09"/>
+              <geom name="l_upper_handle_visual" mesh="l_upper_handle" class="visual"/>
+              <geom name="l_upper_handle_collision" mesh="l_upper_handle_collision" class="collision"/>
+              <site type="sphere" size="0.02" rgba="1 0 0 1" name="left_shoulder_site" pos="0.0 0.0 0.0"/>
+              <body name="l_shoulder_x" pos="0.03575 0.03417 -1.13687e-15" quat="1 0 0 0">
+                <inertial mass="0.2382" pos="-0.0351961 -2.35527e-09 -0.0201831" fullinertia="0.00012531 0.000142725 7.61443e-05 -1.03008e-11 -1.98882e-06 5.73032e-12"/>
+                <geom name="l_shoulder_x_visual" mesh="l_shoulder_x" class="visual"/>
+                <geom name="l_shoulder_x_collision" mesh="l_shoulder_x_collision" class="collision"/>
+                <body name="l_arm_mid_part" pos="-0.03505 1.39266e-15 -0.04975" quat="1 0 0 0">
+                  <inertial mass="0.2614" pos="-0.00968615 -0.00032637 -0.0600067" fullinertia="0.000311894 0.000299782 8.55765e-05 6.76435e-08 1.50954e-05 -3.99224e-06"/>
+                  <geom name="l_arm_mid_part_visual" mesh="l_arm_mid_part" class="visual"/>
+                  <geom name="l_arm_mid_part_collision" mesh="l_arm_mid_part_collision" class="collision"/>
+                  <body name="l_elbow_part" pos="-0.00805 0.0341 -0.09385" quat="1 0 0 0">
+                    <inertial mass="0.081" pos="0.039753 -0.0285485 -1.22748e-11" fullinertia="3.71542e-05 8.13264e-05 0.000100753 1.04013e-05 -1.01419e-13 6.14273e-13"/>
+                    <geom name="l_elbow_part_visual" mesh="l_elbow_part" class="visual"/>
+                    <geom name="l_elbow_part_collision" mesh="l_elbow_part_collision" class="collision"/>
+                    <site type="sphere" size="0.02" rgba="1 0 0 1" name="left_elbow_site" pos="0.0 -0.032 0.0"/>
+                    <site type="sphere" size="0.02" rgba="1 0 0 1" name="left_hand_site" pos="0.15 -0.032 0.0"/>
+                    <body name="left_hand" pos="0.15 -0.032 0.0">
+                      <geom name="left_hand" type="sphere" size=".0001" density="0"/>
+                    </body>
+                    <joint name="left_elbow_joint" axis="0 1 0" range="-0.4 3.0" class="servo_xm430"/>
+                  </body>
+                  <joint name="left_shoulder_yaw_joint" axis="0 0 1" range="-3.0 3.0" class="servo_xm430"/>
+                </body>
+                <joint name="left_shoulder_roll_joint" axis="1 0 0" range="-0.8 3.0" class="servo_xm540"/>
+              </body>
+              <joint name="left_shoulder_pitch_joint" axis="0 1 0" range="-3.0 3.0" class="servo_xm540"/>
+            </body>
+            <body name="neck" pos="-0.01555 -3.86181e-16 0.11875" quat="1 0 0 0">
+              <inertial mass="0.2064" pos="-0.0120542 -0.00407904 0.0418112" fullinertia="0.000213142 0.000165157 0.000111459 7.26336e-08 -5.50255e-07 4.69218e-09"/>
+              <geom name="neck_visual" mesh="neck" class="visual"/>
+              <geom name="neck_collision" mesh="neck_collision" class="collision"/>
+              <body name="chin" pos="-0.012 0.03205 0.07702" quat="1 0 0 0">
+                <inertial mass="0.2804" pos="0.0339948 -0.030023 -0.00520456" fullinertia="8.32235e-05 0.00039706 0.000383823 2.08344e-06 3.33954e-05 -2.64155e-07"/>
+                <geom name="chin_visual" mesh="chin" class="visual"/>
+                <geom name="chin_collision" mesh="chin_collision" class="collision"/>
+                <body name="head_platform" pos="0.09615 -0.03005 0.00305" quat="1 0 0 0">
+                  <inertial mass="0.145" pos="-0.0644625 -1.28908e-07 0.0355706" fullinertia="7.96805e-05 0.000260843 0.000275358 -1.10501e-08 2.49054e-05 -5.15654e-09"/>
+                  <geom name="head_platform_visual" mesh="head_platform" class="visual"/>
+                  <geom name="head_platform_collision" mesh="head_platform_collision" class="collision"/>
+                  <joint name="neck_roll_joint" axis="1 0 0" range="-0.5 0.5" class="servo_xm430"/>
+                </body>
+                <joint name="neck_pitch_joint" axis="0 1 0" range="-1.0 0.2" class="servo_xm430"/>
+              </body>
+              <joint name="neck_yaw_joint" axis="0 0 1" range="-2.0 2.0" class="servo_xm430"/>
+            </body>
+            <body name="r_upper_handle" pos="-0.01555 -0.05695 0.099" quat="1 0 0 0">
+              <inertial mass="0.0824" pos="0.00208294 -0.0206623 -4.81081e-07" fullinertia="3.45232e-05 7.32255e-05 8.59992e-05 1.7242e-06 -2.70455e-10 -1.6684e-09"/>
+              <geom name="r_upper_handle_visual" mesh="r_upper_handle" class="visual"/>
+              <geom name="r_upper_handle_collision" mesh="r_upper_handle_collision" class="collision"/>
+              <site type="sphere" size="0.02" rgba="1 0 0 1" name="right_shoulder_site" pos="0.0 0.0 0.0"/>
+              <body name="r_shoulder_x" pos="0.03575 -0.03417 -1.02318e-15" quat="1 0 0 0">
+                <inertial mass="0.2382" pos="-0.0351961 1.29516e-08 -0.0201831" fullinertia="0.00012531 0.000142725 7.61444e-05 -4.65765e-12 -1.98905e-06 8.26316e-11"/>
+                <geom name="r_shoulder_x_visual" mesh="r_shoulder_x" class="visual"/>
+                <geom name="r_shoulder_x_collision" mesh="r_shoulder_x_collision" class="collision"/>
+                <body name="r_arm_mid_part" pos="-0.03505 2.27374e-16 -0.05075" quat="1 0 0 0">
+                  <inertial mass="0.2614" pos="-0.00968666 0.000394953 -0.059281" fullinertia="0.000314126 0.000302008 8.5583e-05 -9.01808e-08 1.51579e-05 4.28571e-06"/>
+                  <geom name="r_arm_mid_part_visual" mesh="r_arm_mid_part" class="visual"/>
+                  <geom name="r_arm_mid_part_collision" mesh="r_arm_mid_part_collision" class="collision"/>
+                  <body name="r_elbow_part" pos="-0.00805 -0.03405 -0.09325" quat="1 0 0 0">
+                    <inertial mass="0.081" pos="0.039753 0.0285485 -1.22756e-11" fullinertia="3.71542e-05 8.13264e-05 0.000100753 -1.04013e-05 -1.01418e-13 -6.14273e-13"/>
+                    <geom name="r_elbow_part_visual" mesh="r_elbow_part" class="visual"/>
+                    <geom name="r_elbow_part_collision" mesh="r_elbow_part_collision" class="collision"/>
+                    <site type="sphere" size="0.02" rgba="1 0 0 1" name="right_elbow_site" pos="0.0 0.032 0.0"/>
+                    <site type="sphere" size="0.02" rgba="1 0 0 1" name="right_hand_site" pos="0.15 0.032 0.0"/>
+                    <body name="right_hand" pos="0.15 0.032 0.0">
+                      <geom name="right_hand" type="sphere" size=".0001" density="0"/>
+                    </body>
+                    <joint name="right_elbow_joint" axis="0 1 0" range="-0.4 3.0" class="servo_xm430"/>
+                  </body>
+                  <joint name="right_shoulder_yaw_joint" axis="0 0 1" range="-3.0 3.0" class="servo_xm430"/>
+                </body>
+                <joint name="right_shoulder_roll_joint" axis="1 0 0" range="-3.0 0.8" class="servo_xm540"/>
+              </body>
+              <joint name="right_shoulder_pitch_joint" axis="0 1 0" range="-3.0 3.0" class="servo_xm540"/>
+            </body>
+            <joint name="torso_yaw_joint" axis="0 0 1" range="-1.07 1.07" class="servo_xm540"/>
+          </body>
+          <joint name="torso_roll_joint" axis="1 0 0" range="-1.0 1.2" class="servo_xm540"/>
+        </body>
+        <joint name="torso_pitch_joint" axis="0 1 0" range="-0.45 1.4" class="servo_xm540"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <gyro name="chest_gyro" site="chest_imu"/>
+    <gyro name="hip_gyro" site="hip_imu"/>
+    <framelinvel name="hip_lin_vel" objtype="site" objname="hip_imu"/>
+  </sensor>
+
+  <contact>
+    <exclude body1="hip_mid_section" body2="torso"/>
+    <exclude body1="hip_mid_section" body2="torso_upper_handle"/>
+    <exclude body1="torso" body2="torso_upper_handle"/>
+    <exclude body1="chest" body2="neck"/>
+    <exclude body1="neck" body2="chin"/>
+    <exclude body1="chin" body2="head_platform"/>
+    <exclude body1="neck" body2="head_platform"/>
+  </contact>
+
+  <statistic center="0 0 0.1" extent="0.8"/>
+
+  <visual>
+    <headlight diffuse=".8 .8 .8" ambient=".2 .2 .2" specular="1 1 1"/>
+    <rgba force="1 0 0 1"/>
+    <global azimuth="120" elevation="-20" offwidth="3840" offheight="2160"/>
+    <map force="0.01"/>
+    <scale forcewidth="0.3" contactwidth="0.5" contactheight="0.2"/>
+    <quality shadowsize="8192"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="1 1 1" rgb2="1 1 1" width="800" height="800"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="1 1 1" rgb2="1 1 1"
+      markrgb="0 0 0" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" size="0 0 0.01" pos="0 0 0.0" type="plane" material="groundplane" contype="1" conaffinity="0"/>
+  </worldbody>
+
+  <actuator>
+    <position name="left_hip_roll"          joint="left_hip_roll_joint"          class="servo_xm540"/>
+    <position name="left_hip_yaw"           joint="left_hip_yaw_joint"           class="servo_xm540"/>
+    <position name="left_hip_pitch"         joint="left_hip_pitch_joint"         class="servo_xm540"/>
+    <position name="left_knee"              joint="left_knee_joint"              class="servo_xm540"/>
+    <position name="left_ankle"             joint="left_ankle_joint"             class="servo_xm430"/>
+    <position name="right_hip_roll"         joint="right_hip_roll_joint"         class="servo_xm540"/>
+    <position name="right_hip_yaw"          joint="right_hip_yaw_joint"          class="servo_xm540"/>
+    <position name="right_hip_pitch"        joint="right_hip_pitch_joint"        class="servo_xm540"/>
+    <position name="right_knee"             joint="right_knee_joint"             class="servo_xm540"/>
+    <position name="right_ankle"            joint="right_ankle_joint"            class="servo_xm430"/>
+    <position name="torso_pitch"            joint="torso_pitch_joint"            class="servo_xm540"/>
+    <position name="torso_roll"             joint="torso_roll_joint"             class="servo_xm540"/>
+    <position name="torso_yaw"              joint="torso_yaw_joint"              class="servo_xm540"/>
+    <position name="left_shoulder_pitch"    joint="left_shoulder_pitch_joint"    class="servo_xm540"/>
+    <position name="left_shoulder_roll"     joint="left_shoulder_roll_joint"     class="servo_xm540"/>
+    <position name="left_shoulder_yaw"      joint="left_shoulder_yaw_joint"      class="servo_xm430"/>
+    <position name="left_elbow"             joint="left_elbow_joint"             class="servo_xm430"/>
+    <position name="neck_yaw"               joint="neck_yaw_joint"               class="servo_xm430"/>
+    <position name="neck_pitch"             joint="neck_pitch_joint"             class="servo_xm430"/>
+    <position name="neck_roll"              joint="neck_roll_joint"              class="servo_xm430"/>
+    <position name="right_shoulder_pitch"   joint="right_shoulder_pitch_joint"   class="servo_xm540"/>
+    <position name="right_shoulder_roll"    joint="right_shoulder_roll_joint"    class="servo_xm540"/>
+    <position name="right_shoulder_yaw"     joint="right_shoulder_yaw_joint"     class="servo_xm430"/>
+    <position name="right_elbow"            joint="right_elbow_joint"            class="servo_xm430"/>
+  </actuator>
+</mujoco>

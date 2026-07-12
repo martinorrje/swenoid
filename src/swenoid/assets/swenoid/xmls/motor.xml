@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<mujoco>
+    <worldbody>
+        <body name="base" pos="0.0 0.0 0.0" quat='1 0 0 0'>
+            <geom type="box" size="0.1 0.1 0.1"/>
+            <inertial mass="1.0" pos="0.05 0.05 0.05" diaginertia="0.00167 0.00167 0.00167"/>
+            <body name="attached_part" pos="0.2 0.0 0.1" quat="1 0 0 0">
+                <inertial mass="5.0" pos="0.05 0.05 0.1" diaginertia='0.02083335 0.020833333500000002 0.008333334999999999'/>
+                <geom type="box" size="0.1 0.1 0.2" />
+                <joint name="joint" pos="0.0 0.0 -0.1" axis="1 0 0" armature="0.01" frictionloss="0.1" damping="10.0"/>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <motor name="motor" joint="joint" ctrllimited="true" ctrlrange="-10 10"/>
+    </actuator>
+</mujoco>

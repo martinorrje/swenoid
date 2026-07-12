@@ -1,0 +1,20 @@
+Swenoid
+Copyright 2026 Martin Orrje, Arvid Eriksson, and David Broman
+
+This software depends on and extends MjLab, developed by the MjLab contributors
+and available at https://github.com/mujocolab/mjlab under the Apache License,
+Version 2.0. MjLab itself is installed as a dependency and is not vendored here.
+
+Actuator simulation uses BAM: Better Actuator Models, developed by Marc
+Duclusaud, Gregoire Passault, and contributors and available at
+https://github.com/Rhoban/bam under the Apache License, Version 2.0.
+
+Third-party source files retain their original copyright and license notices.
+BONES-SEED motion data is not distributed in this repository and is governed by
+the separate BONES Motion Capture Dataset License Agreement.
+
+The development-only MuJoCo type information under typings/ follows the MuJoCo
+project's Apache License, Version 2.0.
+
+The BNO085 frame-conversion module retains the supplied SPDX attribution to
+Bryan Siepert and Adafruit Industries and is distributed under the Unlicense.

@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+title: "Swenoid: Open-source software for an accessible humanoid robot"
+message: >-
+  If you use this software, please cite the Swenoid paper and the upstream MjLab
+  and BAM projects described in the repository README.
+type: software
+authors:
+  - given-names: Martin
+    family-names: Orrje
+    email: morrje@kth.se
+  - given-names: Arvid
+    family-names: Eriksson
+    email: arveri@kth.se
+  - given-names: David
+    family-names: Broman
+    email: dbro@kth.se
+repository-code: "https://github.com/martinorrje/swenoid"
+keywords:
+  - humanoid-robotics
+  - mujoco
+  - reinforcement-learning
+  - motion-tracking
+  - sim-to-real
+license: Apache-2.0
+version: 0.1.0
+date-released: "2026-07-12"
+preferred-citation:
+  type: article
+  title: "Swenoid: An Accessible Open-Source Humanoid Robot"
+  authors:
+    - given-names: Martin
+      family-names: Orrje
+    - given-names: Arvid
+      family-names: Eriksson
+    - given-names: David
+      family-names: Broman
+  year: 2026
