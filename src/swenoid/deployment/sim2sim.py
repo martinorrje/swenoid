@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import sys
+import sysconfig
 import time
 from pathlib import Path
 from typing import Any, cast
@@ -48,6 +51,30 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--benchmark", action="store_true")
     parser.add_argument("--record", type=Path)
     return parser.parse_args()
+
+
+def _ensure_mjpython() -> None:
+    """Relaunch under MuJoCo's macOS GUI dispatcher when required."""
+    if sys.platform != "darwin" or getattr(mujoco.viewer, "_MJPYTHON", None):
+        return
+    mjpython = Path(sys.executable).with_name("mjpython")
+    if not mjpython.is_file():
+        raise RuntimeError(f"MuJoCo mjpython launcher not found at {mjpython}")
+    libdir = sysconfig.get_config_var("LIBDIR")
+    fallback = os.environ.get("DYLD_FALLBACK_LIBRARY_PATH", "")
+    if isinstance(libdir, str) and libdir not in fallback.split(os.pathsep):
+        os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = os.pathsep.join(
+            path for path in (libdir, fallback) if path
+        )
+    os.execv(
+        str(mjpython),
+        [
+            str(mjpython),
+            "-m",
+            "swenoid.deployment.sim2sim",
+            *sys.argv[1:],
+        ],
+    )
 
 
 def build_standalone_model(
@@ -233,6 +260,7 @@ class Sim2SimRunner:
 
 
 def main() -> None:
+    _ensure_mjpython()
     args = parse_args()
     path = resolve_policy_path(
         onnx_path=args.onnx,

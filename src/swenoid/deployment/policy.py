@@ -39,22 +39,28 @@ def download_wandb_onnx(
     cache_root: Path = Path("wandb_checkpoints"),
     filename: str | None = None,
 ) -> Path:
-    """Download the one ONNX policy attached to a W&B run."""
+    """Download an ONNX policy attached to a W&B run."""
     import wandb
 
     run = wandb.Api().run(run_path)
-    candidates = [item.name for item in run.files() if item.name.endswith(".onnx")]
+    candidates = [item for item in run.files() if item.name.endswith(".onnx")]
     if filename is not None:
-        candidates = [name for name in candidates if name == filename]
-    if len(candidates) != 1:
-        raise ValueError(
-            f"Expected one ONNX file in {run_path}, found {len(candidates)}: {candidates}"
-        )
-    name = candidates[0]
+        selected = next((item for item in candidates if item.name == filename), None)
+        if selected is None:
+            available = [item.name for item in candidates]
+            raise ValueError(
+                f"ONNX file {filename!r} not found in {run_path}; "
+                f"available: {available}"
+            )
+    else:
+        if not candidates:
+            raise ValueError(f"No ONNX files found in {run_path}")
+        selected = max(candidates, key=lambda item: (item.updated_at or "", item.name))
+    name = selected.name
     output_dir = cache_root / run.id
     output_path = output_dir / name
     if not output_path.exists():
-        run.file(name).download(str(output_dir), replace=True)
+        selected.download(str(output_dir), replace=True)
     return output_path
 
 
