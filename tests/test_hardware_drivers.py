@@ -1,8 +1,10 @@
 """Hardware-driver tests using protocol fakes rather than connected devices."""
 
+import sys
+from types import ModuleType
+
 import numpy as np
 import pytest
-from serial import SerialException
 
 from swenoid.deployment.bno085 import BNO085, rot_ang_vel, rot_gravity
 from swenoid.deployment.motor_controller import (
@@ -11,6 +13,16 @@ from swenoid.deployment.motor_controller import (
     DynamixelHandler,
     unsigned_to_signed,
 )
+
+
+class _FakeSerialException(Exception):
+    pass
+
+
+def _install_fake_serial(monkeypatch) -> None:
+    module = ModuleType("serial")
+    module.SerialException = _FakeSerialException
+    monkeypatch.setitem(sys.modules, "serial", module)
 
 
 class _FakePortHandler:
@@ -259,6 +271,7 @@ def test_dynamixel_register_read_retries_transport_errors() -> None:
 
 
 def test_position_velocity_read_retries_serial_readiness_error(monkeypatch) -> None:
+    _install_fake_serial(monkeypatch)
     handler = DynamixelHandler(
         port="/dev/fake",
         baudrate=4_000_000,
@@ -273,7 +286,7 @@ def test_position_velocity_read_retries_serial_readiness_error(monkeypatch) -> N
         nonlocal attempts
         attempts += 1
         if attempts < 3:
-            raise SerialException(
+            raise _FakeSerialException(
                 "device reports readiness to read but returned no data "
                 "(device disconnected or multiple access on port?)"
             )
@@ -289,6 +302,7 @@ def test_position_velocity_read_retries_serial_readiness_error(monkeypatch) -> N
 
 
 def test_position_velocity_read_bounds_serial_readiness_retries(monkeypatch) -> None:
+    _install_fake_serial(monkeypatch)
     handler = DynamixelHandler(
         port="/dev/fake",
         baudrate=4_000_000,
@@ -302,20 +316,21 @@ def test_position_velocity_read_bounds_serial_readiness_retries(monkeypatch) -> 
     def persistent_read():
         nonlocal attempts
         attempts += 1
-        raise SerialException(
+        raise _FakeSerialException(
             "device reports readiness to read but returned no data "
             "(device disconnected or multiple access on port?)"
         )
 
     monkeypatch.setattr(handler.pos_vel_groupSyncRead, "fastSyncRead", persistent_read)
 
-    with pytest.raises(SerialException, match="returned no data"):
+    with pytest.raises(_FakeSerialException, match="returned no data"):
         handler.read_positions_and_velocities([1, 2])
 
     assert attempts == 3
 
 
 def test_position_velocity_read_does_not_retry_other_serial_errors(monkeypatch) -> None:
+    _install_fake_serial(monkeypatch)
     handler = DynamixelHandler(
         port="/dev/fake",
         baudrate=4_000_000,
@@ -329,11 +344,11 @@ def test_position_velocity_read_does_not_retry_other_serial_errors(monkeypatch) 
     def failed_read():
         nonlocal attempts
         attempts += 1
-        raise SerialException("read failed: input/output error")
+        raise _FakeSerialException("read failed: input/output error")
 
     monkeypatch.setattr(handler.pos_vel_groupSyncRead, "fastSyncRead", failed_read)
 
-    with pytest.raises(SerialException, match="input/output error"):
+    with pytest.raises(_FakeSerialException, match="input/output error"):
         handler.read_positions_and_velocities([1, 2])
 
     assert attempts == 1
