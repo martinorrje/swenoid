@@ -13,6 +13,7 @@ build/
 logs/
 wandb/
 wandb_checkpoints/
+docs/superpowers/
 data/
 *.mp4
 *.npz
