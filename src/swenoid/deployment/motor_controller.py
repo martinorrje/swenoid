@@ -32,6 +32,16 @@ ADDR_INDIRECT_DATA_1 = 224
 DEFAULT_PORT = "/dev/ttyUSB0"
 DEFAULT_BAUDRATE = 4_000_000
 PROTOCOL_VERSION = 2.0
+SERIAL_READINESS_ERROR = "device reports readiness to read but returned no data"
+
+
+def _is_serial_readiness_error(error: Exception) -> bool:
+    """Return whether *error* is PySerial's transient empty-read failure."""
+    try:
+        serial_exception = import_module("serial").SerialException
+    except (AttributeError, ModuleNotFoundError):
+        return False
+    return isinstance(error, serial_exception) and SERIAL_READINESS_ERROR in str(error)
 
 
 def unsigned_to_signed(value: int, size: int) -> int:
@@ -436,8 +446,16 @@ class DynamixelHandler:
                 f"Position/velocity sync read is not configured for IDs {sorted(missing)}"
             )
         result = self.sdk.COMM_NOT_AVAILABLE
-        for _ in range(self.max_retries):
-            result = self.pos_vel_groupSyncRead.fastSyncRead()
+        for attempt in range(self.max_retries):
+            try:
+                result = self.pos_vel_groupSyncRead.fastSyncRead()
+            except Exception as exc:
+                if (
+                    not _is_serial_readiness_error(exc)
+                    or attempt + 1 >= self.max_retries
+                ):
+                    raise
+                continue
             if result == self.sdk.COMM_SUCCESS:
                 break
         if result != self.sdk.COMM_SUCCESS:

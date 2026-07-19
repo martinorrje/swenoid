@@ -100,28 +100,60 @@ def _make_general_motion_onnx(path: Path) -> None:
     onnx.save(model, path)
 
 
-def _make_tracking_onnx(path: Path, frames: int = 7) -> None:
+def _make_tracking_onnx(
+    path: Path, frames: int = 7, *, motion_as_constants: bool = False
+) -> None:
     joint_pos = np.arange(frames * 24, dtype=np.float32).reshape(frames, 24)
     joint_vel = -joint_pos
     actions = numpy_helper.from_array(
         np.zeros((1, 24), dtype=np.float32), name="actions_value"
     )
     initializers = [
-        numpy_helper.from_array(joint_pos, name="motion_joint_pos"),
-        numpy_helper.from_array(joint_vel, name="motion_joint_vel"),
-        numpy_helper.from_array(np.asarray([1], dtype=np.int64), name="squeeze_axes"),
+        numpy_helper.from_array(np.asarray([1], dtype=np.int64), name="squeeze_axes")
     ]
-    nodes = [
-        helper.make_node("Constant", [], ["actions"], value=actions),
-        helper.make_node("Squeeze", ["time_step", "squeeze_axes"], ["time_flat"]),
-        helper.make_node("Cast", ["time_flat"], ["time_index"], to=TensorProto.INT64),
-        helper.make_node(
-            "Gather", ["motion_joint_pos", "time_index"], ["joint_pos"], axis=0
-        ),
-        helper.make_node(
-            "Gather", ["motion_joint_vel", "time_index"], ["joint_vel"], axis=0
-        ),
-    ]
+    nodes = [helper.make_node("Constant", [], ["actions"], value=actions)]
+    if motion_as_constants:
+        nodes.extend(
+            [
+                helper.make_node(
+                    "Constant",
+                    [],
+                    ["motion_joint_pos"],
+                    value=numpy_helper.from_array(
+                        joint_pos, name="motion_joint_pos_value"
+                    ),
+                ),
+                helper.make_node(
+                    "Constant",
+                    [],
+                    ["motion_joint_vel"],
+                    value=numpy_helper.from_array(
+                        joint_vel, name="motion_joint_vel_value"
+                    ),
+                ),
+            ]
+        )
+    else:
+        initializers.extend(
+            [
+                numpy_helper.from_array(joint_pos, name="motion_joint_pos"),
+                numpy_helper.from_array(joint_vel, name="motion_joint_vel"),
+            ]
+        )
+    nodes.extend(
+        [
+            helper.make_node("Squeeze", ["time_step", "squeeze_axes"], ["time_flat"]),
+            helper.make_node(
+                "Cast", ["time_flat"], ["time_index"], to=TensorProto.INT64
+            ),
+            helper.make_node(
+                "Gather", ["motion_joint_pos", "time_index"], ["joint_pos"], axis=0
+            ),
+            helper.make_node(
+                "Gather", ["motion_joint_vel", "time_index"], ["joint_vel"], axis=0
+            ),
+        ]
+    )
     graph = helper.make_graph(
         nodes,
         "tracking",
@@ -358,6 +390,21 @@ def test_tracking_policy_reads_embedded_reference(tmp_path) -> None:
     assert policy.is_tracking
     assert policy.policy_kind == "single_motion"
     assert policy.motion_length == 7
+    reference = policy.reference_at(3)
+    assert reference is not None
+    np.testing.assert_array_equal(reference[0][0], np.arange(72, 96))
+    np.testing.assert_array_equal(reference[1], -reference[0])
+
+
+def test_tracking_policy_reads_legacy_constant_reference(tmp_path) -> None:
+    path = tmp_path / "legacy-tracking.onnx"
+    _make_tracking_onnx(path, frames=740, motion_as_constants=True)
+
+    policy = OnnxPolicy(path)
+
+    assert policy.is_tracking
+    assert policy.policy_kind == "single_motion"
+    assert policy.motion_length == 740
     reference = policy.reference_at(3)
     assert reference is not None
     np.testing.assert_array_equal(reference[0][0], np.arange(72, 96))
