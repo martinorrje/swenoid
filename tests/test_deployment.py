@@ -11,10 +11,40 @@ import pytest
 import wandb
 from onnx import TensorProto, helper, numpy_helper
 
+import swenoid.deployment.real as real
 import swenoid.deployment.sim2sim as sim2sim
 from swenoid.deployment.policy import OnnxPolicy, download_wandb_onnx, motion_length
 from swenoid.deployment.sim2sim import build_standalone_model
 from swenoid.deployment.swenoid_control import SwenoidControl
+
+
+class _FailedRobotRunner:
+    def __init__(self) -> None:
+        self.args = type("Args", (), {"disable_torque_on_exit": True})()
+        self.disable_torque: bool | None = None
+
+    def run(self) -> None:
+        raise RuntimeError("serial failure")
+
+    def close(self, *, disable_torque: bool) -> None:
+        self.disable_torque = disable_torque
+
+
+def test_real_deployment_leaves_torque_enabled_by_default(monkeypatch) -> None:
+    monkeypatch.setattr(sys, "argv", ["swenoid-deploy", "--onnx", "policy.onnx"])
+
+    args = real.parse_args()
+    assert args.disable_torque_on_exit is False
+    assert args.serial_retries == 100
+
+
+def test_real_deployment_never_disables_torque_after_failure() -> None:
+    runner = _FailedRobotRunner()
+
+    with pytest.raises(RuntimeError, match="serial failure"):
+        real.RealRobotRunner.execute(runner)  # pyright: ignore[reportArgumentType]
+
+    assert runner.disable_torque is False
 
 
 def _metadata(
