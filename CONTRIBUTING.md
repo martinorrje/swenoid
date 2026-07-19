@@ -82,10 +82,17 @@ Do not silently omit it.
 
 ## Hardware-facing changes
 
-Code that can move the robot must retain the existing safeguards: torque-off
-initialization, target and joint-limit checks, rejection of non-finite values,
-bounded communication retries, and torque-off shutdown. Unit tests with protocol
-fakes are required even when the change has been exercised on hardware.
+Code that can move the robot must retain the existing safeguards: staging the
+current position before torque is enabled, target and joint-limit checks,
+rejection of non-finite values, bounded communication retries, and the explicit
+shutdown policy. Unexpected failures must not automatically remove joint
+support. Unit tests with protocol fakes are required even when a change has been
+exercised on hardware.
+
+Changes to the real-experiment archive are public data-format changes. Bump the
+schema version when compatibility changes, document the migration, update the
+field reference, and include a no-pickle round-trip fixture plus hardware-driver
+fake coverage.
 
 In the pull request, record the controller, firmware, bus configuration,
 calibration profile, physical support, emergency-stop arrangement, and exact

@@ -71,6 +71,7 @@ uv run --no-sync wandb login
 Contributor setup and the exact CI commands are documented in
 [`CONTRIBUTING.md`](CONTRIBUTING.md). Detailed runtime documentation is split
 between the [deployment guide](docs/deployment.md), the
+[real-experiment protocol](docs/real_experiments.md), the
 [general-motion contract](docs/general_motion.md), and the
 [reference-model notes](docs/reference_models.md).
 
@@ -369,9 +370,9 @@ physical emergency stop accessible. The software is research software and is
 not a substitute for mechanical support, current limiting, thermal protection,
 or an independent emergency-stop path.
 
-See [`docs/deployment.md`](docs/deployment.md) for device setup, calibration,
-local ONNX usage, controls, recording, timing checks, and the complete bring-up
-checklist.
+See the [deployment guide](docs/deployment.md) for device setup, calibration,
+and safety, and the [real-experiment protocol](docs/real_experiments.md) for the
+recording schema, external tracking, outcome annotation, and paper metrics.
 
 ## Repository layout
 
