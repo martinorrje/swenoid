@@ -457,12 +457,15 @@ def test_hardware_step_safety_rejects_large_jump() -> None:
         control.move_servos([3000] * 24, [2000] * 24)
 
 
-def test_hardware_conversion_rejects_target_far_outside_motor_limit() -> None:
+def test_hardware_conversion_clips_target_to_motor_limit() -> None:
     control = SwenoidControl(dynamixel_handler=_FakeDynamixelHandler())
     target = np.zeros(24, dtype=np.float32)
     target[0] = 4.0
-    with pytest.raises(ValueError, match="limit"):
-        control.pos_isaac_to_dynamixel(target)
+
+    encoded = control.pos_isaac_to_dynamixel(target)
+
+    motor_index = control.dynamixel_dof_names.index(control.isaac_dof_names[0])
+    assert encoded[motor_index] == 0
 
 
 def test_standalone_bam_model_covers_all_actuators() -> None:

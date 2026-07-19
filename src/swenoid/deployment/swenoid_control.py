@@ -161,19 +161,6 @@ class SwenoidControl:
         position = position[self.isaac_ids_to_dynamixel_ids]
         position = (position / np.pi) * 2048 + 2048
         position += self.dynamixel_base_pos
-        for index in range(len(position)):
-            lower = self.lower_limits[index]
-            upper = self.upper_limits[index]
-            if position[index] < lower and lower - position[index] >= 100:
-                raise ValueError(
-                    f"Motor {self.all_ids[index]} target {position[index]:.1f} "
-                    f"is below its lower limit {lower}"
-                )
-            if position[index] > upper and position[index] - upper >= 100:
-                raise ValueError(
-                    f"Motor {self.all_ids[index]} target {position[index]:.1f} "
-                    f"is above its upper limit {upper}"
-                )
         position = np.clip(position, self.lower_limits, self.upper_limits)
         return [int(position[i]) for i in range(len(position))]
 

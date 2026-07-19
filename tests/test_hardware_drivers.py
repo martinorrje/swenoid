@@ -94,6 +94,18 @@ class _UnverifiedWritePacketHandler(_VerifiedWritePacketHandler):
         return 812, 0, 0
 
 
+class _TransientReadPacketHandler(_FakePacketHandler):
+    def __init__(self, protocol):
+        super().__init__(protocol)
+        self.read4_attempts = 0
+
+    def read4ByteTxRx(self, _port, motor_id, address):
+        self.read4_attempts += 1
+        if self.read4_attempts < 3:
+            return 0, -3002, 0
+        return motor_id * 100 + address, 0, 0
+
+
 class _FakeGroupSyncRead:
     def __init__(self, _port, _packet, address, byte_len):
         self.address = address
@@ -176,6 +188,10 @@ class _UnverifiedWriteSdk(_FakeSdk):
     PacketHandler = _UnverifiedWritePacketHandler
 
 
+class _TransientReadSdk(_FakeSdk):
+    PacketHandler = _TransientReadPacketHandler
+
+
 class _FakeBnoSensor:
     gyro = (1.0, 2.0, 3.0)
     gravity = (9.80665, 0.0, 0.0)
@@ -226,6 +242,19 @@ def test_dynamixel_duration_can_use_preconfigured_drive_mode() -> None:
     assert not any(
         call[1] == ADDR_DRIVE_MODE for call in handler.packetHandler.write1_calls
     )
+
+
+def test_dynamixel_register_read_retries_transport_errors() -> None:
+    handler = DynamixelHandler(
+        port="/dev/fake",
+        baudrate=4_000_000,
+        configure_latency=False,
+        max_retries=3,
+        sdk=_TransientReadSdk,
+    )
+
+    assert handler.read_lower_limits([1]) == [152]
+    assert handler.packetHandler.read4_attempts == 3
 
 
 def test_dynamixel_write_retries_transient_transport_errors() -> None:
