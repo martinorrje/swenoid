@@ -146,22 +146,68 @@ class DynamixelHandler:
             )
 
     def _write1(self, motor_id: int, address: int, value: int, operation: str) -> None:
-        result, error = self.packetHandler.write1ByteTxRx(
-            self.portHandler, motor_id, address, int(value)
+        self._write(
+            self.packetHandler.write1ByteTxRx,
+            self.packetHandler.read1ByteTxRx,
+            motor_id,
+            address,
+            int(value),
+            operation,
         )
-        self._check_result(result, error, operation)
 
     def _write2(self, motor_id: int, address: int, value: int, operation: str) -> None:
-        result, error = self.packetHandler.write2ByteTxRx(
-            self.portHandler, motor_id, address, int(value) & 0xFFFF
+        self._write(
+            self.packetHandler.write2ByteTxRx,
+            self.packetHandler.read2ByteTxRx,
+            motor_id,
+            address,
+            int(value) & 0xFFFF,
+            operation,
         )
-        self._check_result(result, error, operation)
 
     def _write4(self, motor_id: int, address: int, value: int, operation: str) -> None:
-        result, error = self.packetHandler.write4ByteTxRx(
-            self.portHandler, motor_id, address, int(value) & 0xFFFFFFFF
+        self._write(
+            self.packetHandler.write4ByteTxRx,
+            self.packetHandler.read4ByteTxRx,
+            motor_id,
+            address,
+            int(value) & 0xFFFFFFFF,
+            operation,
         )
-        self._check_result(result, error, operation)
+
+    def _write(
+        self,
+        writer: Any,
+        reader: Any,
+        motor_id: int,
+        address: int,
+        value: int,
+        operation: str,
+    ) -> None:
+        context = f"{operation} for motor {motor_id} at address {address}"
+        write_result = self.sdk.COMM_NOT_AVAILABLE
+        for _ in range(self.max_retries):
+            write_result, error = writer(self.portHandler, motor_id, address, value)
+            if write_result == self.sdk.COMM_SUCCESS:
+                self._check_result(write_result, error, context)
+                return
+
+        read_result = self.sdk.COMM_NOT_AVAILABLE
+        for _ in range(self.max_retries):
+            actual, read_result, error = reader(self.portHandler, motor_id, address)
+            if read_result == self.sdk.COMM_SUCCESS:
+                self._check_result(read_result, error, f"verify {context}")
+                if int(actual) == value:
+                    return
+                raise RuntimeError(
+                    f"Could not verify {context}: expected {value}, read {actual}"
+                )
+        raise RuntimeError(
+            f"{context} failed after {self.max_retries} attempts "
+            f"({self.packetHandler.getTxRxResult(write_result)}), and readback "
+            f"failed after {self.max_retries} attempts "
+            f"({self.packetHandler.getTxRxResult(read_result)})"
+        )
 
     def _read2(self, motor_id: int, address: int, operation: str) -> int:
         value, result, error = self.packetHandler.read2ByteTxRx(
