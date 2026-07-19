@@ -434,7 +434,7 @@ license, and the Swenoid paper when using this work.
 
 ## License
 
-Code is released under the [Apache License 2.0](LICENSE), except where a file
+Code is released under the [MIT License](LICENSE), except where a file
 states another upstream license. BONES-SEED data is not covered by this license
 and is not included. The forthcoming CAD repository will state its own hardware
 license separately.
