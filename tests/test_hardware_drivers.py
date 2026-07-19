@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from serial import SerialException
 
 from swenoid.deployment.bno085 import BNO085, rot_ang_vel, rot_gravity
 from swenoid.deployment.motor_controller import (
@@ -255,6 +256,87 @@ def test_dynamixel_register_read_retries_transport_errors() -> None:
 
     assert handler.read_lower_limits([1]) == [152]
     assert handler.packetHandler.read4_attempts == 3
+
+
+def test_position_velocity_read_retries_serial_readiness_error(monkeypatch) -> None:
+    handler = DynamixelHandler(
+        port="/dev/fake",
+        baudrate=4_000_000,
+        configure_latency=False,
+        max_retries=3,
+        sdk=_FakeSdk,
+    )
+    handler.add_pos_vel_group_sync_read([1, 2])
+    attempts = 0
+
+    def transient_read():
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise SerialException(
+                "device reports readiness to read but returned no data "
+                "(device disconnected or multiple access on port?)"
+            )
+        return handler.sdk.COMM_SUCCESS
+
+    monkeypatch.setattr(handler.pos_vel_groupSyncRead, "fastSyncRead", transient_read)
+
+    positions, velocities = handler.read_positions_and_velocities([1, 2])
+
+    assert positions == [2001, 2002]
+    assert velocities == [-1, -1]
+    assert attempts == 3
+
+
+def test_position_velocity_read_bounds_serial_readiness_retries(monkeypatch) -> None:
+    handler = DynamixelHandler(
+        port="/dev/fake",
+        baudrate=4_000_000,
+        configure_latency=False,
+        max_retries=3,
+        sdk=_FakeSdk,
+    )
+    handler.add_pos_vel_group_sync_read([1, 2])
+    attempts = 0
+
+    def persistent_read():
+        nonlocal attempts
+        attempts += 1
+        raise SerialException(
+            "device reports readiness to read but returned no data "
+            "(device disconnected or multiple access on port?)"
+        )
+
+    monkeypatch.setattr(handler.pos_vel_groupSyncRead, "fastSyncRead", persistent_read)
+
+    with pytest.raises(SerialException, match="returned no data"):
+        handler.read_positions_and_velocities([1, 2])
+
+    assert attempts == 3
+
+
+def test_position_velocity_read_does_not_retry_other_serial_errors(monkeypatch) -> None:
+    handler = DynamixelHandler(
+        port="/dev/fake",
+        baudrate=4_000_000,
+        configure_latency=False,
+        max_retries=3,
+        sdk=_FakeSdk,
+    )
+    handler.add_pos_vel_group_sync_read([1, 2])
+    attempts = 0
+
+    def failed_read():
+        nonlocal attempts
+        attempts += 1
+        raise SerialException("read failed: input/output error")
+
+    monkeypatch.setattr(handler.pos_vel_groupSyncRead, "fastSyncRead", failed_read)
+
+    with pytest.raises(SerialException, match="input/output error"):
+        handler.read_positions_and_velocities([1, 2])
+
+    assert attempts == 1
 
 
 def test_dynamixel_write_retries_transient_transport_errors() -> None:

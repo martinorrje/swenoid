@@ -8,24 +8,39 @@ from pathlib import Path
 import numpy as np
 import onnx
 import onnxruntime as ort
+from onnx import shape_inference
 
 
 def motion_length(model_path: Path) -> int | None:
-    """Return an embedded tracking motion length, or ``None`` for velocity."""
+    """Return an embedded tracking reference length, if present."""
     model = onnx.load(str(model_path))
     if "time_step" not in {value.name for value in model.graph.input}:
         return None
-    initializer_shapes = {
-        initializer.name: tuple(initializer.dims)
-        for initializer in model.graph.initializer
+
+    inferred = shape_inference.infer_shapes(model)
+    tensor_lengths = {
+        initializer.name: int(initializer.dims[0])
+        for initializer in inferred.graph.initializer
+        if len(initializer.dims) > 0 and initializer.dims[0] > 0
     }
-    lengths = []
-    for node in model.graph.node:
-        if node.op_type != "Gather" or not node.input:
-            continue
-        shape = initializer_shapes.get(node.input[0])
-        if shape and shape[0] > 0:
-            lengths.append(int(shape[0]))
+    for value in (
+        *inferred.graph.input,
+        *inferred.graph.output,
+        *inferred.graph.value_info,
+    ):
+        dimensions = value.type.tensor_type.shape.dim
+        if (
+            len(dimensions) > 0
+            and dimensions[0].HasField("dim_value")
+            and dimensions[0].dim_value > 0
+        ):
+            tensor_lengths[value.name] = int(dimensions[0].dim_value)
+
+    lengths = [
+        tensor_lengths[node.input[0]]
+        for node in inferred.graph.node
+        if node.op_type == "Gather" and node.input and node.input[0] in tensor_lengths
+    ]
     if not lengths:
         raise ValueError(
             "Tracking ONNX has a time_step input but no embedded motion tensor"
