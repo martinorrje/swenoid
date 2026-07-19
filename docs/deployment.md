@@ -76,6 +76,41 @@ Test the transformed IMU output before connecting motor power:
 uv run swenoid-bno085
 ```
 
+### Motor mapping and neutral calibration
+
+The packaged reference profile records the 24 motor IDs, joint ordering, axis
+signs, and neutral encoder counts. Inspect the connected bus with torque off:
+
+```bash
+uv run swenoid-calibrate --port /dev/ttyUSB0
+```
+
+For a different assembly, support the robot, disconnect external loads where
+practical, disable motor power until positioning is safe, and place every joint
+at the MuJoCo zero angle. Then capture the current torque-off encoder counts:
+
+```bash
+uv run swenoid-calibrate \
+  --port /dev/ttyUSB0 \
+  --capture-zero \
+  --name my-swenoid \
+  --output hardware-calibration.json
+```
+
+The command never enables torque. It refuses encoder values outside the servo
+limits and will not overwrite an existing profile unless `--overwrite` is
+passed. Encoder capture cannot infer axis signs: inspect the JSON and verify
+each joint individually while the robot is supported. Keep the calibration
+file outside version control if it describes one physical unit.
+
+Pass the profile to physical deployment:
+
+```bash
+uv run swenoid-deploy \
+  --hardware-config hardware-calibration.json \
+  --onnx /path/to/policy.onnx
+```
+
 ## Sim2sim
 
 Run a local ONNX file:

@@ -5,9 +5,12 @@ controller is constructed, so simulation and preprocessing remain portable.
 """
 
 from importlib import import_module
+from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+from swenoid.deployment.hardware_config import HardwareConfig
 
 
 class SwenoidControl:
@@ -15,7 +18,7 @@ class SwenoidControl:
 
     def __init__(
         self,
-        config: Any = None,
+        config: HardwareConfig | Path | str | None = None,
         device: Any = None,
         dynamixel_handler: Any = None,
         *,
@@ -24,7 +27,12 @@ class SwenoidControl:
         configure_latency: bool = True,
         max_retries: int = 3,
     ) -> None:
-        del config, device
+        del device
+        hardware = (
+            config
+            if isinstance(config, HardwareConfig)
+            else HardwareConfig.load(config)
+        )
         if dynamixel_handler is None:
             try:
                 motor_controller = import_module("swenoid.deployment.motor_controller")
@@ -42,7 +50,7 @@ class SwenoidControl:
             )
         self.dynamixel_handler = dynamixel_handler
 
-        self.all_ids = list(range(1, 25))
+        self.all_ids = list(hardware.motor_ids)
 
         self.delay = 0.0
         self.durations_ms = [int(self.delay * 1000) for _ in range(24)]
@@ -56,59 +64,8 @@ class SwenoidControl:
             self._closed = True
             raise
 
-        self.isaac_dof_names = [
-            "left_hip_roll_joint",
-            "left_hip_yaw_joint",
-            "left_hip_pitch_joint",
-            "left_knee_joint",
-            "left_ankle_joint",
-            "right_hip_roll_joint",
-            "right_hip_yaw_joint",
-            "right_hip_pitch_joint",
-            "right_knee_joint",
-            "right_ankle_joint",
-            "torso_pitch_joint",
-            "torso_roll_joint",
-            "torso_yaw_joint",
-            "left_shoulder_pitch_joint",
-            "left_shoulder_roll_joint",
-            "left_shoulder_yaw_joint",
-            "left_elbow_joint",
-            "neck_yaw_joint",
-            "neck_pitch_joint",
-            "neck_roll_joint",
-            "right_shoulder_pitch_joint",
-            "right_shoulder_roll_joint",
-            "right_shoulder_yaw_joint",
-            "right_elbow_joint",
-        ]
-
-        self.dynamixel_dof_names = [
-            "neck_pitch_joint",
-            "neck_roll_joint",
-            "neck_yaw_joint",
-            "right_shoulder_pitch_joint",
-            "right_shoulder_roll_joint",
-            "right_shoulder_yaw_joint",
-            "right_elbow_joint",
-            "left_shoulder_pitch_joint",
-            "left_shoulder_roll_joint",
-            "left_shoulder_yaw_joint",
-            "left_elbow_joint",
-            "torso_yaw_joint",
-            "torso_pitch_joint",
-            "torso_roll_joint",
-            "right_hip_roll_joint",
-            "right_hip_yaw_joint",
-            "right_hip_pitch_joint",
-            "right_knee_joint",
-            "right_ankle_joint",
-            "left_hip_roll_joint",
-            "left_hip_yaw_joint",
-            "left_hip_pitch_joint",
-            "left_knee_joint",
-            "left_ankle_joint",
-        ]
+        self.isaac_dof_names = list(hardware.simulation_joint_names)
+        self.dynamixel_dof_names = list(hardware.dynamixel_joint_names)
 
         self.dynamixel_ids_to_isaac_ids = [
             self.dynamixel_dof_names.index(isaac_dof_name)
@@ -120,38 +77,7 @@ class SwenoidControl:
             for dxl_dof_name in self.dynamixel_dof_names
         ]
 
-        self.dynamixel_axis_mask = np.asarray(
-            [
-                -1,
-                -1,
-                -1,
-                1,
-                -1,
-                1,
-                1,
-                -1,
-                -1,
-                1,
-                -1,
-                -1,
-                -1,
-                1,
-                1,
-                1,
-                -1,
-                -1,
-                -1,
-                1,
-                1,
-                1,
-                1,
-                1,
-            ],
-            dtype=np.float32,
-        )
-        self.dynamixel_axis_mask = -self.dynamixel_axis_mask[
-            self.dynamixel_ids_to_isaac_ids
-        ]
+        self.dynamixel_axis_mask = np.asarray(hardware.axis_signs, dtype=np.float32)
 
         lower_limits_raw = self.dynamixel_handler.read_lower_limits(self.all_ids)
         lower_limits = [
@@ -166,17 +92,9 @@ class SwenoidControl:
         self.lower_limits = np.asarray(lower_limits, dtype=np.int64)
         self.upper_limits = np.asarray(upper_limits, dtype=np.int64)
 
-        base_pos = np.zeros(24, dtype=np.float32)
-        base_pos[14] = -np.pi / 2
-        base_pos[16] = -np.pi / 2
-        base_pos[21] = np.pi / 2
-        base_pos[23] = np.pi / 2
-        base_pos = (base_pos / np.pi) * 2048 + 2048
-        base_pos = base_pos[self.isaac_ids_to_dynamixel_ids]
-
-        self.dynamixel_base_pos = np.zeros(24, dtype=np.float32)
-        indices = np.asarray([8, 10, 4, 6], dtype=np.intp)
-        self.dynamixel_base_pos[indices] = base_pos[indices] - 2048
+        self.dynamixel_base_pos = (
+            np.asarray(hardware.zero_positions, dtype=np.float32) - 2048
+        )
 
     def _setup_dxl_handler(self) -> None:
         if self._handler_configured:

@@ -28,6 +28,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--project", default="mjlab")
     parser.add_argument("--onnx-name")
     parser.add_argument("--port", default="/dev/ttyUSB0")
+    parser.add_argument(
+        "--hardware-config",
+        type=Path,
+        help="Per-robot motor mapping and neutral calibration JSON.",
+    )
     parser.add_argument("--baudrate", type=int, default=4_000_000)
     parser.add_argument("--serial-retries", type=int, default=3)
     parser.add_argument("--i2c-frequency", type=int, default=800_000)
@@ -120,6 +125,7 @@ class RealRobotRunner:
         self.imu = ImuReader(i2c_frequency=args.i2c_frequency)
         self.imu.wait()
         self.control = SwenoidControl(
+            config=args.hardware_config,
             port=args.port,
             baudrate=args.baudrate,
             configure_latency=args.configure_latency,

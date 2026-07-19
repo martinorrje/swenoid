@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "release": "v0.1.0",
+  "generated_at": "2026-07-19",
+  "models": [
+    {
+      "name": "swenoid-velocity-flat",
+      "policy_kind": "velocity",
+      "status": "completed",
+      "seed": 42,
+      "training_iteration": 29999,
+      "source_run": "morrje-kth-royal-institute-of-technology/mjlab/sen97i20",
+      "source_url": "https://wandb.ai/morrje-kth-royal-institute-of-technology/mjlab/runs/sen97i20",
+      "assets": {
+        "onnx": {
+          "filename": "swenoid-velocity-flat.onnx",
+          "sha256": "1f6f84a5572d8109983b1eada32cf14d68143feff2401a74cf54eec36d94d7b6"
+        },
+        "checkpoint": {
+          "filename": "swenoid-velocity-flat-model-29999.pt",
+          "sha256": "853c46034c50c44cc3587b561c27d21e1da8ca07498015c4fc7e3ba656982983"
+        }
+      },
+      "final_metrics": {
+        "mean_reward": 66.43419965744019,
+        "mean_episode_length": 989.23,
+        "velocity_xy_error": 0.5227781534194946,
+        "yaw_velocity_error": 0.9943185448646544
+      }
+    },
+    {
+      "name": "swenoid-general-motion-preview",
+      "policy_kind": "general_motion",
+      "status": "preview_from_active_run",
+      "seed": 42,
+      "training_iteration": 13500,
+      "source_run": "morrje-kth-royal-institute-of-technology/mjlab/i3gh0rev",
+      "source_url": "https://wandb.ai/morrje-kth-royal-institute-of-technology/mjlab/runs/i3gh0rev",
+      "assets": {
+        "onnx": {
+          "filename": "swenoid-general-motion-preview.onnx",
+          "sha256": "5ff7984195f7d077ca0a567292203055dd553fb2ad0375607abce6ae66f84bb8"
+        },
+        "checkpoint": {
+          "filename": "swenoid-general-motion-preview-model-13500.pt",
+          "sha256": "72cb815b5151bab68cc20c9f14b38c521bc9e7c77f9d0f5f1e2cc3199860932b"
+        }
+      }
+    }
+  ]
+}
+
