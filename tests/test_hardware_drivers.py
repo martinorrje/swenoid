@@ -213,6 +213,21 @@ def test_dynamixel_group_read_and_write_without_hardware() -> None:
     assert handler.portHandler.closed
 
 
+def test_dynamixel_duration_can_use_preconfigured_drive_mode() -> None:
+    handler = DynamixelHandler(
+        port="/dev/fake",
+        baudrate=4_000_000,
+        configure_latency=False,
+        sdk=_FakeSdk,
+    )
+
+    handler.set_duration_accel([1, 2], [100, 100], configure_drive_mode=False)
+
+    assert not any(
+        call[1] == ADDR_DRIVE_MODE for call in handler.packetHandler.write1_calls
+    )
+
+
 def test_dynamixel_write_retries_transient_transport_errors() -> None:
     handler = DynamixelHandler(
         port="/dev/fake",

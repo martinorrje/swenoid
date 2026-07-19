@@ -99,11 +99,8 @@ class SwenoidControl:
     def _setup_dxl_handler(self) -> None:
         if self._handler_configured:
             return
-        # EEPROM-backed mode and indirect-address configuration requires torque
-        # to be off. The deployment procedure therefore starts with the robot
-        # physically supported and enables torque only for the staged start pose.
-        self.dynamixel_handler.disable_torque(self.all_ids)
-        self.dynamixel_handler.set_zero_return_delay_time(self.all_ids)
+        torque_enabled = self.dynamixel_handler.read_torque_enabled(self.all_ids)
+        configure_persistent = not any(torque_enabled)
         voltages = self.dynamixel_handler.read_servo_voltages(self.all_ids)
         print("Voltages: ", voltages)
         for voltage in voltages:
@@ -111,12 +108,19 @@ class SwenoidControl:
                 raise Exception(
                     f"Voltage level is too low ({voltage}). Recharge the batteries!"
                 )
-        self.dynamixel_handler.write_indirect_addresses(self.all_ids)
+        # Persistent mode and indirect-address writes require torque to already
+        # be off. Deployment never changes torque state to perform this setup.
+        if configure_persistent:
+            self.dynamixel_handler.set_zero_return_delay_time(self.all_ids)
+            self.dynamixel_handler.write_indirect_addresses(self.all_ids)
+            self.dynamixel_handler.set_position_mode(self.all_ids)
         self.dynamixel_handler.add_pos_vel_group_sync_read(self.all_ids)
-        self.dynamixel_handler.set_position_mode(self.all_ids)
         self.dynamixel_handler.set_kp(self.all_ids, 800)
         self.dynamixel_handler.set_duration_accel(
-            self.all_ids, self.durations_ms, [self.durations_ms[i] for i in range(24)]
+            self.all_ids,
+            self.durations_ms,
+            [self.durations_ms[i] for i in range(24)],
+            configure_drive_mode=configure_persistent,
         )
         self._handler_configured = True
 

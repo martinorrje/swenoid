@@ -216,6 +216,13 @@ class DynamixelHandler:
         self._check_result(result, error, operation)
         return int(value)
 
+    def _read1(self, motor_id: int, address: int, operation: str) -> int:
+        value, result, error = self.packetHandler.read1ByteTxRx(
+            self.portHandler, motor_id, address
+        )
+        self._check_result(result, error, operation)
+        return int(value)
+
     def _read4(self, motor_id: int, address: int, operation: str) -> int:
         value, result, error = self.packetHandler.read4ByteTxRx(
             self.portHandler, motor_id, address
@@ -272,6 +279,8 @@ class DynamixelHandler:
         ids: Sequence[int],
         durations: Sequence[int],
         accel: Sequence[int] | None = None,
+        *,
+        configure_drive_mode: bool = True,
     ) -> None:
         if len(ids) != len(durations):
             raise ValueError("ids and durations must have the same length")
@@ -280,6 +289,8 @@ class DynamixelHandler:
             raise ValueError("ids and acceleration must have the same length")
         for index, motor_id in enumerate(ids):
             motor_id = int(motor_id)
+            if not configure_drive_mode:
+                self._time_profile_ids.add(motor_id)
             if motor_id not in self._time_profile_ids:
                 # Drive Mode is EEPROM on X-series servos and may only be changed
                 # while torque is disabled. SwenoidControl configures it once at
@@ -341,6 +352,12 @@ class DynamixelHandler:
     def disable_torque(self, ids: Sequence[int]) -> None:
         for motor_id in ids:
             self._write1(motor_id, ADDR_TORQUE_ENABLE, 0, "disable torque")
+
+    def read_torque_enabled(self, ids: Sequence[int]) -> list[bool]:
+        return [
+            bool(self._read1(motor_id, ADDR_TORQUE_ENABLE, "read torque state"))
+            for motor_id in ids
+        ]
 
     def enable_torque(self, ids: Sequence[int]) -> None:
         for motor_id in ids:
