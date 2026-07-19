@@ -159,9 +159,9 @@ rejects target jumps larger than 800 Dynamixel counts and warns about missed
 change this with `--velocity-steps`.
 
 The physical runner defaults to a zero velocity command. A nonzero command must
-be supplied explicitly with `--command`. Targets outside the limits read from
-the servos are rejected (with only sub-100-count numerical overshoots clamped),
-and non-finite policy outputs are never sent.
+be supplied explicitly with `--command`. Targets are clamped to the position
+limits read from each servo, the per-step movement limit remains enforced, and
+non-finite policy outputs are never sent.
 
 By default, torque remains enabled when the program exits so a standing robot
 does not lose joint support. Unexpected failures never disable torque. Support

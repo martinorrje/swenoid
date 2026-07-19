@@ -224,11 +224,19 @@ class DynamixelHandler:
         return int(value)
 
     def _read4(self, motor_id: int, address: int, operation: str) -> int:
-        value, result, error = self.packetHandler.read4ByteTxRx(
-            self.portHandler, motor_id, address
+        result = self.sdk.COMM_NOT_AVAILABLE
+        for _ in range(self.max_retries):
+            value, result, error = self.packetHandler.read4ByteTxRx(
+                self.portHandler, motor_id, address
+            )
+            if result == self.sdk.COMM_SUCCESS:
+                self._check_result(result, error, operation)
+                return int(value)
+        raise RuntimeError(
+            f"{operation} for motor {motor_id} at address {address} failed after "
+            f"{self.max_retries} attempts: "
+            f"{self.packetHandler.getTxRxResult(result)}"
         )
-        self._check_result(result, error, operation)
-        return int(value)
 
     def add_pos_vel_group_sync_read(self, ids: Sequence[int]) -> None:
         for motor_id in ids:
