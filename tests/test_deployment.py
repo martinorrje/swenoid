@@ -369,7 +369,11 @@ class _FakeDynamixelHandler:
         self.events = []
 
     def disable_torque(self, *_):
-        pass
+        self.events.append(("disable",))
+
+    def read_torque_enabled(self, ids):
+        self.events.append(("read_torque", list(ids)))
+        return [True] * len(ids)
 
     def set_zero_return_delay_time(self, *_):
         pass
@@ -389,8 +393,8 @@ class _FakeDynamixelHandler:
     def set_kp(self, *_):
         pass
 
-    def set_duration_accel(self, *_):
-        pass
+    def set_duration_accel(self, *_, **kwargs):
+        self.events.append(("duration", kwargs))
 
     def read_lower_limits(self, ids):
         return [(0,)] * len(ids)
@@ -418,6 +422,16 @@ def test_hardware_joint_conversion_round_trip() -> None:
     encoded = control.pos_isaac_to_dynamixel(source)
     decoded = control.pos_dynamixel_to_isaac(encoded)
     np.testing.assert_allclose(decoded, source, atol=2 * np.pi / 4096, rtol=0.0)
+
+
+def test_hardware_setup_does_not_disable_existing_torque() -> None:
+    handler = _FakeDynamixelHandler()
+
+    SwenoidControl(dynamixel_handler=handler)
+
+    assert not any(event[0] == "disable" for event in handler.events)
+    duration_event = next(event for event in handler.events if event[0] == "duration")
+    assert duration_event[1] == {"configure_drive_mode": False}
 
 
 def test_hardware_stages_current_goal_before_enabling_torque() -> None:

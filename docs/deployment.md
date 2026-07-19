@@ -150,12 +150,13 @@ uv run --no-sync swenoid-deploy \
 ```
 
 The program warms up the IMU, checks battery voltage through the Dynamixel
-handler, disables torque while configuring EEPROM-backed servo modes, moves to
-the ONNX default pose over three seconds, and waits for an explicit Enter press
-before starting. Keep the robot supported throughout initialization. It rejects
-target jumps larger than 800 Dynamixel counts and warns about missed 20 ms
-deadlines. A velocity command is zeroed after 200 steps by default; change this
-with `--velocity-steps`.
+handler, moves to the ONNX default pose over three seconds, and waits for an
+explicit Enter press before starting. Deployment never disables torque during
+setup. Persistent servo configuration is written only when every motor is
+already torque-off. Keep the robot supported throughout initialization. It
+rejects target jumps larger than 800 Dynamixel counts and warns about missed
+20 ms deadlines. A velocity command is zeroed after 200 steps by default;
+change this with `--velocity-steps`.
 
 The physical runner defaults to a zero velocity command. A nonzero command must
 be supplied explicitly with `--command`. Targets outside the limits read from
