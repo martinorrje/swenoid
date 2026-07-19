@@ -12,8 +12,7 @@ format, an actuator model, or the hardware protocol.
 
 A useful bug report includes the release or commit, operating system, hardware or
 simulation backend, exact command, full traceback or output, and the smallest
-reproduction you can provide. Do not put credentials or details that could lead
-to unsafe robot motion in a public issue; send those to `morrje@kth.se`.
+reproduction you can provide.
 
 ## Set up a development checkout
 
