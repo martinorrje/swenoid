@@ -16,8 +16,8 @@ XM430-W350 and XM540-W270 actuator models from
 > motion training, sim2sim, physical deployment, the 24-motor Dynamixel
 > transport, and the pelvis BNO085 driver are included. Live camera retargeting
 > and real-time imitation will be added later. The separate Swenoid CAD
-> repository is being prepared and will be linked here before the hardware
-> release.
+> repository publishes the MIT-licensed STEP assembly; print-ready exports,
+> assembly instructions, and the bill of materials are still being prepared.
 
 ## Repository ecosystem
 
@@ -25,11 +25,11 @@ XM430-W350 and XM540-W270 actuator models from
 | --- | --- | --- |
 | **`martinorrje/swenoid`** (this repository) | MuJoCo model, MjLab tasks, BONES-SEED retargeting, training, visualization, and ONNX export | Available |
 | [`martinorrje/bam`](https://github.com/martinorrje/bam) | Swenoid BAM fork, raw-data processing, XM430/XM540 fitting, parameters, and fit plots | Available |
-| [`martinorrje/swenoid_cad`](https://github.com/martinorrje/swenoid_cad) | STEP robot assembly; print exports, assembly information, and bill of materials are pending | Hardware license and publication pending |
+| [`martinorrje/swenoid_cad`](https://github.com/martinorrje/swenoid_cad) | MIT-licensed STEP robot assembly; print exports, assembly information, and bill of materials are pending | Assembly available |
 
 The MuJoCo meshes needed to run this repository are included. The separate
-CAD repository will be published after its hardware license and release files are
-finalized.
+CAD repository provides the hardware assembly, with additional release files in
+progress.
 
 ## What is included
 
