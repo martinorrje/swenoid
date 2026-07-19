@@ -36,7 +36,7 @@ rates; references are interpolated at the 50 Hz control times.
 Pass either a recursive root:
 
 ```bash
-uv run swenoid-train Mjlab-General-Motion-Flat-Swenoid \
+uv run --no-sync swenoid-train Mjlab-General-Motion-Flat-Swenoid \
   --env.commands.motion.motion-root /absolute/path/to/npz \
   --agent.logger wandb \
   --agent.wandb-project swenoid \
@@ -46,7 +46,7 @@ uv run swenoid-train Mjlab-General-Motion-Flat-Swenoid \
 or a text manifest containing one absolute NPZ path per line:
 
 ```bash
-uv run swenoid-train Mjlab-General-Motion-Flat-Swenoid \
+uv run --no-sync swenoid-train Mjlab-General-Motion-Flat-Swenoid \
   --env.commands.motion.motion-list /absolute/path/to/accepted_npz.txt \
   --agent.logger wandb \
   --agent.wandb-project swenoid \

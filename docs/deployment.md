@@ -22,13 +22,13 @@ imitation pipeline.
 For sim2sim on a workstation:
 
 ```bash
-uv sync --extra sim2sim
+uv sync --frozen --no-dev --extra sim2sim
 ```
 
 For physical deployment on the Raspberry Pi:
 
 ```bash
-uv sync --extra deployment
+uv sync --frozen --no-dev --extra deployment
 ```
 
 The deployment extra installs ONNX Runtime, the ROBOTIS Dynamixel SDK, Adafruit
@@ -73,7 +73,7 @@ attempts, and an 800 kHz I2C bus. They can be overridden with `--port`,
 Test the transformed IMU output before connecting motor power:
 
 ```bash
-uv run swenoid-bno085
+uv run --no-sync swenoid-bno085
 ```
 
 ### Motor mapping and neutral calibration
@@ -82,7 +82,7 @@ The packaged reference profile records the 24 motor IDs, joint ordering, axis
 signs, and neutral encoder counts. Inspect the connected bus with torque off:
 
 ```bash
-uv run swenoid-calibrate --port /dev/ttyUSB0
+uv run --no-sync swenoid-calibrate --port /dev/ttyUSB0
 ```
 
 For a different assembly, support the robot, disconnect external loads where
@@ -90,7 +90,7 @@ practical, disable motor power until positioning is safe, and place every joint
 at the MuJoCo zero angle. Then capture the current torque-off encoder counts:
 
 ```bash
-uv run swenoid-calibrate \
+uv run --no-sync swenoid-calibrate \
   --port /dev/ttyUSB0 \
   --capture-zero \
   --name my-swenoid \
@@ -106,7 +106,7 @@ file outside version control if it describes one physical unit.
 Pass the profile to physical deployment:
 
 ```bash
-uv run swenoid-deploy \
+uv run --no-sync swenoid-deploy \
   --hardware-config hardware-calibration.json \
   --onnx /path/to/policy.onnx
 ```
@@ -116,13 +116,13 @@ uv run swenoid-deploy \
 Run a local ONNX file:
 
 ```bash
-uv run swenoid-sim2sim --onnx /path/to/policy.onnx --loop
+uv run --no-sync swenoid-sim2sim --onnx /path/to/policy.onnx --loop
 ```
 
 Or download it from W&B:
 
 ```bash
-uv run swenoid-sim2sim \
+uv run --no-sync swenoid-sim2sim \
   --wandb-run ENTITY/PROJECT/RUN_ID \
   --loop
 ```
@@ -142,7 +142,7 @@ position-servo baseline (`kp=20`, damping `1.0`, armature `0.01`) for comparison
 Run from a supported Raspberry Pi control environment:
 
 ```bash
-uv run swenoid-deploy \
+uv run --no-sync swenoid-deploy \
   --wandb-run ENTITY/PROJECT/RUN_ID \
   --port /dev/ttyUSB0 \
   --command 0.25 0.0 0.0 \

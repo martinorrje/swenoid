@@ -15,7 +15,7 @@ sha256sum -c SHA256SUMS
 Run the velocity ONNX in standalone MuJoCo:
 
 ```bash
-uv run swenoid-sim2sim --onnx swenoid-velocity-flat.onnx --loop
+uv run --no-sync swenoid-sim2sim --onnx swenoid-velocity-flat.onnx --loop
 ```
 
 The general-motion preview validates the 126-value policy contract and can be

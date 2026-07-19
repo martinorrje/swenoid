@@ -23,7 +23,7 @@ keywords:
   - sim-to-real
 license: MIT
 version: 0.1.0
-date-released: "2026-07-12"
+date-released: "2026-07-19"
 preferred-citation:
   type: article
   title: "Swenoid: An Accessible Open-Source Humanoid Robot"
