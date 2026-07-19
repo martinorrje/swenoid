@@ -4,6 +4,7 @@ The hardware-specific ``motor_controller`` module is imported only when the
 controller is constructed, so simulation and preprocessing remain portable.
 """
 
+from dataclasses import dataclass
 from importlib import import_module
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,15 @@ from typing import Any
 import numpy as np
 
 from swenoid.deployment.hardware_config import HardwareConfig
+
+
+@dataclass(frozen=True)
+class PositionCommand:
+    """A limited hardware goal and the exact target represented by its counts."""
+
+    dynamixel_goal: list[int]
+    sent_position_rad: np.ndarray
+    clipped: np.ndarray
 
 
 class SwenoidControl:
@@ -50,6 +60,7 @@ class SwenoidControl:
             )
         self.dynamixel_handler = dynamixel_handler
 
+        self.hardware_config = hardware
         self.all_ids = list(hardware.motor_ids)
 
         self.delay = 0.0
@@ -102,6 +113,7 @@ class SwenoidControl:
         torque_enabled = self.dynamixel_handler.read_torque_enabled(self.all_ids)
         configure_persistent = not any(torque_enabled)
         voltages = self.dynamixel_handler.read_servo_voltages(self.all_ids)
+        self.startup_voltage_raw = [int(voltage) for voltage in voltages]
         print("Voltages: ", voltages)
         for voltage in voltages:
             if voltage < 100:
@@ -115,7 +127,8 @@ class SwenoidControl:
             self.dynamixel_handler.write_indirect_addresses(self.all_ids)
             self.dynamixel_handler.set_position_mode(self.all_ids)
         self.dynamixel_handler.add_pos_vel_group_sync_read(self.all_ids)
-        self.dynamixel_handler.set_kp(self.all_ids, 800)
+        self.position_p_gain = 800
+        self.dynamixel_handler.set_kp(self.all_ids, self.position_p_gain)
         self.dynamixel_handler.set_duration_accel(
             self.all_ids,
             self.durations_ms,
@@ -146,23 +159,29 @@ class SwenoidControl:
         position = (position - 2048) / 2048 * np.pi
         return position * self.dynamixel_axis_mask
 
-    def pos_isaac_to_dynamixel(self, dof_pos: Any) -> list[int]:
-        """
-        Converts joint angles on isaac format (-pi to pi, 0 is 0-position) to dynamixel format (ints 0-4095, 2048 is 0-position)
-        :param dof_pos: array-like with 24 joint angles in Isaac order
-        :return: List with 24 elements, one joint angle for each motor on dynamixel format
-        """
-        dof_pos = self._as_numpy(dof_pos).astype(np.float32, copy=False).reshape(-1)
-        if dof_pos.size != 24:
-            raise ValueError(f"Expected 24 joint positions, got {dof_pos.size}")
-        if not np.isfinite(dof_pos).all():
+    def encode_position_command(self, dof_pos: Any) -> PositionCommand:
+        """Encode a target while retaining the applied limit-clipping details."""
+        requested = self._as_numpy(dof_pos).astype(np.float32, copy=False).reshape(-1)
+        if requested.size != 24:
+            raise ValueError(f"Expected 24 joint positions, got {requested.size}")
+        if not np.isfinite(requested).all():
             raise ValueError("Joint targets must all be finite")
-        position = self.dynamixel_axis_mask * dof_pos
+        position = self.dynamixel_axis_mask * requested
         position = position[self.isaac_ids_to_dynamixel_ids]
         position = (position / np.pi) * 2048 + 2048
         position += self.dynamixel_base_pos
+        clipped = (position < self.lower_limits) | (position > self.upper_limits)
         position = np.clip(position, self.lower_limits, self.upper_limits)
-        return [int(position[i]) for i in range(len(position))]
+        dynamixel_goal = [int(position[i]) for i in range(len(position))]
+        return PositionCommand(
+            dynamixel_goal=dynamixel_goal,
+            sent_position_rad=self.pos_dynamixel_to_isaac(dynamixel_goal),
+            clipped=clipped.astype(np.bool_),
+        )
+
+    def pos_isaac_to_dynamixel(self, dof_pos: Any) -> list[int]:
+        """Convert an Isaac-order radian target to Dynamixel encoder counts."""
+        return self.encode_position_command(dof_pos).dynamixel_goal
 
     def vel_dynamixel_to_isaac(self, dof_vel: list[int]) -> np.ndarray:
         """
@@ -186,6 +205,23 @@ class SwenoidControl:
     def read_current(self) -> list[int]:
         currents = self.dynamixel_handler.read_servo_currents(self.all_ids)
         return currents
+
+    def read_servo_telemetry(self) -> tuple[list[int], list[int], list[int]]:
+        """Read current, voltage, and temperature in Dynamixel bus order."""
+        return self.dynamixel_handler.read_servo_telemetry(self.all_ids)
+
+    def recording_metadata(self) -> dict[str, Any]:
+        """Return the calibrated mapping and controller settings for a trial."""
+        return {
+            "hardware_config": self.hardware_config.to_dict(),
+            "simulation_joint_names": list(self.isaac_dof_names),
+            "dynamixel_joint_names": list(self.dynamixel_dof_names),
+            "motor_ids": list(self.all_ids),
+            "position_lower_limit_raw": self.lower_limits.tolist(),
+            "position_upper_limit_raw": self.upper_limits.tolist(),
+            "startup_voltage_raw": list(self.startup_voltage_raw),
+            "position_p_gain": self.position_p_gain,
+        }
 
     def enable_torques(self) -> None:
         self.dynamixel_handler.enable_torque(self.all_ids)

@@ -139,29 +139,69 @@ position-servo baseline (`kp=20`, damping `1.0`, armature `0.01`) for comparison
 
 ## Physical robot
 
-Run from a supported Raspberry Pi control environment:
+Run from a supported Raspberry Pi control environment. For an exploratory,
+unrecorded run:
+
+```bash
+uv run --no-sync swenoid-deploy \
+  --wandb-run ENTITY/PROJECT/RUN_ID \
+  --port /dev/ttyUSB0 \
+  --command 0.25 0.0 0.0
+```
+
+A recorded velocity trial must have a fixed horizon and explicit identity:
 
 ```bash
 uv run --no-sync swenoid-deploy \
   --wandb-run ENTITY/PROJECT/RUN_ID \
   --port /dev/ttyUSB0 \
   --command 0.25 0.0 0.0 \
-  --record data/real_rollout.npz
+  --command-start-step 100 \
+  --velocity-steps 500 \
+  --trial-steps 700 \
+  --trial-id velocity-nominal-seed03-r02 \
+  --condition nominal \
+  --robot-id swenoid-01 \
+  --training-seed 3 \
+  --replicate 2 \
+  --experiment-metadata examples/real_experiments/metadata.json \
+  --external-pose-port 5501 \
+  --external-pose-baseline-samples 2 \
+  --external-pose-timeout-s 2.0 \
+  --external-pose-max-clock-offset-ms 1000 \
+  --record data/real/velocity-nominal-seed03-r02
 ```
+
+`--record` requires `--trial-id`, `--condition`, and `--robot-id`; recorded
+velocity policies also require `--trial-steps`. Recorded trials cannot use
+`--loop`, and existing records are never overwritten implicitly.
+
+With external pose enabled, the runner waits for the configured usable
+baseline (`valid` with quality above zero) before the first policy goal, then
+for a usable endpoint after the last goal. It rejects frame-ID changes, non-Unix
+or non-monotonic source timestamps, and source-to-receipt clock offsets beyond
+the configured maximum. Paper-ready validation also applies the
+predeclared quality threshold and maximum usable-packet gap, so baseline and
+endpoint packets alone cannot stand in for a trajectory. A rejection or timeout
+that leaves the handshake incomplete prevents a clean successful record. These
+waits do not alter the established torque-on-exit behavior.
+
+See the [real-experiment guide](real_experiments.md) for the artifact layout,
+recorded fields, external-pose protocol, annotation, validation, and mapping
+from raw signals to paper metrics.
 
 The program warms up the IMU, checks battery voltage through the Dynamixel
 handler, moves to the ONNX default pose over three seconds, and waits for an
 explicit Enter press before starting. Deployment never disables torque during
 setup. Persistent servo configuration is written only when every motor is
 already torque-off. Keep the robot supported throughout initialization. It
-rejects target jumps larger than 800 Dynamixel counts and warns about missed
-20 ms deadlines. A velocity command is zeroed after 200 steps by default;
-change this with `--velocity-steps`.
+rejects target jumps larger than 800 Dynamixel counts and records missed 20 ms
+deadlines. Velocity commands are applied on the configured step interval and
+are zero outside it.
 
-The physical runner defaults to a zero velocity command. A nonzero command must
-be supplied explicitly with `--command`. Targets are clamped to the position
-limits read from each servo, the per-step movement limit remains enforced, and
-non-finite policy outputs are never sent.
+The physical runner defaults to a zero velocity command. Targets are clamped to
+the position limits read from each servo, the per-step movement limit remains
+enforced, and non-finite policy outputs are never sent.
 
 By default, torque remains enabled when the program exits so a standing robot
 does not lose joint support. Unexpected failures never disable torque. Support

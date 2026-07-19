@@ -25,6 +25,7 @@ ADDR_PRESENT_CURRENT = 126
 ADDR_PRESENT_VELOCITY = 128
 ADDR_PRESENT_POSITION = 132
 ADDR_PRESENT_VOLTAGE = 144
+ADDR_PRESENT_TEMPERATURE = 146
 ADDR_INDIRECT_ADDRESS_1 = 168
 ADDR_INDIRECT_DATA_1 = 224
 
@@ -475,6 +476,57 @@ class DynamixelHandler:
 
     def read_servo_voltages(self, ids: Sequence[int]) -> list[int]:
         return self.read_servos(ids, ADDR_PRESENT_VOLTAGE, 2)
+
+    def read_servo_telemetry(
+        self, ids: Sequence[int]
+    ) -> tuple[list[int], list[int], list[int]]:
+        """Read current, voltage, and temperature in one Group Sync Read.
+
+        The X-series present-state registers occupy one contiguous block from
+        present current (126) through present temperature (146). Keeping this
+        separate from the 8-byte indirect position/velocity read avoids a
+        torque-off migration of existing indirect-address mappings.
+        """
+        start = ADDR_PRESENT_CURRENT
+        byte_len = ADDR_PRESENT_TEMPERATURE - start + 1
+        key = (start, byte_len)
+        if key not in self.group_sync_reads:
+            self.group_sync_reads[key] = self.sdk.GroupSyncRead(
+                self.portHandler, self.packetHandler, start, byte_len
+            )
+        reader = self.group_sync_reads[key]
+        reader.clearParam()
+        for motor_id in ids:
+            if not reader.addParam(int(motor_id)):
+                raise RuntimeError(
+                    f"Could not add motor {motor_id} to telemetry sync read"
+                )
+        try:
+            result = self.sdk.COMM_NOT_AVAILABLE
+            for _ in range(self.max_retries):
+                result = reader.txRxPacket()
+                if result == self.sdk.COMM_SUCCESS:
+                    break
+            if result != self.sdk.COMM_SUCCESS:
+                raise RuntimeError(
+                    "Servo telemetry sync read failed: "
+                    f"{self.packetHandler.getTxRxResult(result)}"
+                )
+            currents, voltages, temperatures = [], [], []
+            for motor_id in ids:
+                if not reader.isAvailable(int(motor_id), start, byte_len):
+                    raise RuntimeError(
+                        f"No telemetry sync-read data for motor {motor_id}"
+                    )
+                current = reader.getData(int(motor_id), ADDR_PRESENT_CURRENT, 2)
+                voltage = reader.getData(int(motor_id), ADDR_PRESENT_VOLTAGE, 2)
+                temperature = reader.getData(int(motor_id), ADDR_PRESENT_TEMPERATURE, 1)
+                currents.append(unsigned_to_signed(int(current), 2))
+                voltages.append(int(voltage))
+                temperatures.append(int(temperature))
+            return currents, voltages, temperatures
+        finally:
+            reader.clearParam()
 
     def disable_torques(self, ids: Sequence[int]) -> None:
         self.disable_torque(ids)

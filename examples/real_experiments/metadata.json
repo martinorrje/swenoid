@@ -1,0 +1,54 @@
+{
+  "experiment_name": "nominal-vs-identified-actuator-transfer",
+  "condition_details": {
+    "simulator_actuator_model": "nominal_pd(kp=20,damping=1,armature=0.01)",
+    "actuator_parameter_files": [],
+    "training_run": ""
+  },
+  "protocol_version": "1",
+  "protocol": {
+    "success_criterion": "",
+    "evaluation_window": "",
+    "infrastructure_exclusion_rule": ""
+  },
+  "operator": "",
+  "robot_configuration": {
+    "battery_pack_id": "",
+    "battery_state_notes": "",
+    "mechanical_configuration": "stock",
+    "maintenance_since_previous_trial": "none"
+  },
+  "environment": {
+    "site": "",
+    "surface": "",
+    "surface_condition": "",
+    "ambient_temperature_c": null
+  },
+  "safety": {
+    "tethered": false,
+    "spotter_present": true,
+    "external_support_allowed_after_start": false
+  },
+  "trial_design": {
+    "block_id": "",
+    "command_sequence_id": "",
+    "order_assignment": ""
+  },
+  "external_tracking": {
+    "system": "",
+    "rigid_body": "pelvis",
+    "world_frame": "",
+    "calibration_id": "",
+    "clock_sync_method": "",
+    "estimated_clock_offset_ms": null,
+    "minimum_quality": null,
+    "maximum_gap_ms": null,
+    "quality_definition": ""
+  },
+  "video": {
+    "camera_id": "",
+    "file": "",
+    "clock_sync_method": ""
+  },
+  "notes": ""
+}
