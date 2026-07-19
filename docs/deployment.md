@@ -162,9 +162,10 @@ be supplied explicitly with `--command`. Targets outside the limits read from
 the servos are rejected (with only sub-100-count numerical overshoots clamped),
 and non-finite policy outputs are never sent.
 
-By default, torque is disabled when the program exits. Use
-`--no-disable-torque-on-exit` only when the robot is externally supported and a
-separate controller will immediately take ownership.
+By default, torque remains enabled when the program exits so a standing robot
+does not lose joint support. Unexpected failures never disable torque. Support
+the robot before powering it down. Pass `--disable-torque-on-exit` only for a
+graceful exit while the robot is externally supported.
 
 ## Safety checklist
 

@@ -34,7 +34,12 @@ def parse_args() -> argparse.Namespace:
         help="Per-robot motor mapping and neutral calibration JSON.",
     )
     parser.add_argument("--baudrate", type=int, default=4_000_000)
-    parser.add_argument("--serial-retries", type=int, default=3)
+    parser.add_argument(
+        "--serial-retries",
+        type=int,
+        default=100,
+        help="Maximum attempts for each Dynamixel transaction.",
+    )
     parser.add_argument("--i2c-frequency", type=int, default=800_000)
     parser.add_argument(
         "--configure-latency",
@@ -54,7 +59,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--disable-torque-on-exit",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
+        help="Disable motor torque after a graceful exit; never used after errors.",
     )
     return parser.parse_args()
 
@@ -213,11 +219,27 @@ class RealRobotRunner:
                 if missed_deadlines % 50 == 1:
                     print(f"[WARN] Missed 50 Hz deadline {missed_deadlines} time(s)")
 
-    def close(self) -> None:
+    def execute(self) -> None:
+        disable_torque = False
+        try:
+            self.run()
+        except KeyboardInterrupt:
+            disable_torque = self.args.disable_torque_on_exit
+        else:
+            disable_torque = self.args.disable_torque_on_exit
+        finally:
+            self.close(disable_torque=disable_torque)
+
+    def close(self, *, disable_torque: bool) -> None:
         self.imu.stop.set()
         try:
-            if self.args.disable_torque_on_exit:
+            if disable_torque:
                 self.control.disable_torques()
+            else:
+                print(
+                    "[SAFETY] Motor torque remains enabled. Support the robot "
+                    "before powering it down."
+                )
         finally:
             try:
                 self.control.close()
@@ -259,12 +281,7 @@ def main() -> None:
     if args.benchmark:
         benchmark(policy)
     runner = RealRobotRunner(policy, args)
-    try:
-        runner.run()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        runner.close()
+    runner.execute()
 
 
 if __name__ == "__main__":
