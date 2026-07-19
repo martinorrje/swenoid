@@ -365,6 +365,9 @@ def test_tracking_policy_reads_embedded_reference(tmp_path) -> None:
 
 
 class _FakeDynamixelHandler:
+    def __init__(self):
+        self.events = []
+
     def disable_torque(self, *_):
         pass
 
@@ -398,6 +401,16 @@ class _FakeDynamixelHandler:
     def close(self):
         pass
 
+    def read_servo_positions(self, ids):
+        self.events.append(("read", list(ids)))
+        return [2000 + motor_id for motor_id in ids]
+
+    def move_servos(self, ids, positions):
+        self.events.append(("goal", list(ids), list(positions)))
+
+    def enable_torque(self, ids):
+        self.events.append(("torque", list(ids)))
+
 
 def test_hardware_joint_conversion_round_trip() -> None:
     control = SwenoidControl(dynamixel_handler=_FakeDynamixelHandler())
@@ -405,6 +418,23 @@ def test_hardware_joint_conversion_round_trip() -> None:
     encoded = control.pos_isaac_to_dynamixel(source)
     decoded = control.pos_dynamixel_to_isaac(encoded)
     np.testing.assert_allclose(decoded, source, atol=2 * np.pi / 4096, rtol=0.0)
+
+
+def test_hardware_stages_current_goal_before_enabling_torque() -> None:
+    handler = _FakeDynamixelHandler()
+    control = SwenoidControl(dynamixel_handler=handler)
+    handler.events.clear()
+
+    control.enable_torques_at_current_position()
+
+    assert [event[0] for event in handler.events] == ["read", "goal", "torque"]
+    assert handler.events[1][2] == [2000 + motor_id for motor_id in range(1, 25)]
+
+
+def test_imu_gravity_validation_preserves_legacy_scaled_values() -> None:
+    gravity = np.asarray([[0.0, 0.02, -0.98]], dtype=np.float32)
+
+    np.testing.assert_array_equal(real.ImuReader._validate_gravity(gravity), gravity)
 
 
 def test_hardware_step_safety_rejects_large_jump() -> None:

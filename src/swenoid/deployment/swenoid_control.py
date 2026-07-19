@@ -199,6 +199,11 @@ class SwenoidControl:
     def enable_torques(self) -> None:
         self.dynamixel_handler.enable_torque(self.all_ids)
 
+    def enable_torques_at_current_position(self) -> None:
+        current_position = self.dynamixel_handler.read_servo_positions(self.all_ids)
+        self.dynamixel_handler.move_servos(self.all_ids, current_position)
+        self.dynamixel_handler.enable_torque(self.all_ids)
+
     def disable_torques(self) -> None:
         self.dynamixel_handler.disable_torque(self.all_ids)
 

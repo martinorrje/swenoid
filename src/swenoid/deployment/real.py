@@ -90,11 +90,11 @@ class ImuReader:
                 gravity_fn()
                 sensor.get_ang_vel()
             self.angular_velocity[:] = np.asarray(sensor.get_ang_vel()).reshape(1, 3)
-            self.projected_gravity[:] = self._normalize_gravity(gravity_fn())
+            self.projected_gravity[:] = self._validate_gravity(gravity_fn())
             self.ready.set()
             while not self.stop.is_set():
                 angular_velocity = np.asarray(sensor.get_ang_vel()).reshape(1, 3)
-                gravity = self._normalize_gravity(gravity_fn())
+                gravity = self._validate_gravity(gravity_fn())
                 self.angular_velocity = (
                     0.45 * angular_velocity + 0.55 * self.angular_velocity
                 ).astype(np.float32)
@@ -106,12 +106,12 @@ class ImuReader:
             self.ready.set()
 
     @staticmethod
-    def _normalize_gravity(value) -> np.ndarray:
+    def _validate_gravity(value) -> np.ndarray:
         gravity = np.asarray(value, dtype=np.float32).reshape(1, 3)
         norm = float(np.linalg.norm(gravity))
         if not np.isfinite(norm) or norm < 1e-6:
             raise ValueError(f"Invalid gravity vector from BNO085: {gravity}")
-        return gravity / norm
+        return gravity
 
     def wait(self) -> None:
         self.ready.wait()
@@ -147,7 +147,7 @@ class RealRobotRunner:
 
     def move_to_start(self) -> None:
         target = self.control.pos_isaac_to_dynamixel(self.policy.default_joint_pos)
-        self.control.enable_torques()
+        self.control.enable_torques_at_current_position()
         self.control.move_servos_duration(target, [3000] * 24)
         input("Robot is at the default pose. Press Enter to start the policy...")
 
