@@ -76,6 +76,7 @@ swenoid-upload-motion = "swenoid.retargeting.upload_wandb:main"
 swenoid-sim2sim = "swenoid.deployment.sim2sim:main"
 swenoid-deploy = "swenoid.deployment.real:main"
 swenoid-bno085 = "swenoid.deployment.bno085:main"
+swenoid-calibrate = "swenoid.deployment.calibrate:main"
 
 [dependency-groups]
 dev = [

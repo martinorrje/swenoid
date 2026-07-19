@@ -24,11 +24,11 @@ XM430-W350 and XM540-W270 actuator models from
 | Repository | Contents | Status |
 | --- | --- | --- |
 | **`martinorrje/swenoid`** (this repository) | MuJoCo model, MjLab tasks, BONES-SEED retargeting, training, visualization, and ONNX export | Available |
-| [`martinorrje/bam`](https://github.com/martinorrje/bam) | Swenoid BAM fork, raw-data processing, XM430/XM540 fitting, parameters, and fit plots | Fork publication pending |
-| [`martinorrje/swenoid_cad`](https://github.com/martinorrje/swenoid_cad) | Editable CAD, print exports, assembly information, and bill of materials | Repository publication pending |
+| [`martinorrje/bam`](https://github.com/martinorrje/bam) | Swenoid BAM fork, raw-data processing, XM430/XM540 fitting, parameters, and fit plots | Available |
+| [`martinorrje/swenoid_cad`](https://github.com/martinorrje/swenoid_cad) | Editable CAD, print exports, assembly information, and bill of materials | Available |
 
-The MuJoCo meshes needed to run this repository are included, so the unpublished
-editable CAD sources do not block simulation or training.
+The MuJoCo meshes needed to run this repository are included, while the separate
+CAD repository provides editable hardware sources and assembly information.
 
 ## What is included
 
@@ -105,6 +105,10 @@ uv run ruff check
 uv run pyright
 uv run pytest tests/
 ```
+
+Pull requests run these checks automatically. See
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for development and hardware-change
+guidelines.
 
 ## Simulation and control rates
 
@@ -363,6 +367,13 @@ observation table, cache behavior, and export status.
 
 ## Checkpoints, ONNX, and deployment
 
+Reference checkpoint/ONNX pairs are published in the
+[`v0.1.0` release](https://github.com/martinorrje/swenoid/releases/tag/v0.1.0).
+Their source runs, iterations, metrics, and SHA-256 checksums are recorded in
+[`reproducibility/reference_models.json`](reproducibility/reference_models.json);
+see [`docs/reference_models.md`](docs/reference_models.md) for limitations and
+the BONES-SEED-derived model boundary.
+
 Training writes local runs under `logs/rsl_rl/<experiment>/...` and logs to W&B
 by default. Each save produces a PyTorch checkpoint and attempts an ONNX export.
 With `--agent.upload-model true`, both are uploaded to the W&B run.
@@ -408,6 +419,7 @@ src/swenoid/retargeting/     BONES-SEED retarget/filter/convert/render/upload to
 src/swenoid/deployment/      Shared ONNX, sim2sim, and physical-robot runners
 tests/                       Robot, task, conversion, ONNX, and controller tests
 typings/                     Development-only MuJoCo type information
+reproducibility/             Reference model provenance and checksums
 ```
 
 ## Dataset attribution

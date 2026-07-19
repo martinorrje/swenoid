@@ -9,11 +9,13 @@ ASSET_DIR = Path(__file__).parent / "assets" / "swenoid"
 SWENOID_XML = ASSET_DIR / "xmls" / "swenoid.xml"
 SWENOID_XM430_BAM_PARAMS = ASSET_DIR / "params" / "xm430_m6.json"
 SWENOID_XM540_BAM_PARAMS = ASSET_DIR / "params" / "xm540_m5.json"
+SWENOID_HARDWARE_CONFIG = ASSET_DIR / "params" / "hardware.json"
 
 for required_file in (
     SWENOID_XML,
     SWENOID_XM430_BAM_PARAMS,
     SWENOID_XM540_BAM_PARAMS,
+    SWENOID_HARDWARE_CONFIG,
 ):
     if not required_file.is_file():
         raise FileNotFoundError(f"Missing packaged Swenoid asset: {required_file}")

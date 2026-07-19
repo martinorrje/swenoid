@@ -17,3 +17,4 @@ data/
 *.mp4
 *.npz
 *.qpos.csv
+hardware-calibration*.json
